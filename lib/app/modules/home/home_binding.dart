@@ -4,6 +4,7 @@ import '../home/home_controller.dart';
 import '../dashboard/dashboard_controller.dart';
 import '../services/services_controller.dart';
 import '../appointments/appointments_controller.dart';
+import '../product_category/product_category_controller.dart';
 
 class HomeBinding extends Bindings {
   @override
@@ -12,17 +13,10 @@ class HomeBinding extends Bindings {
     Get.put(AppointmentService());
 
     // Controllers
-    Get.lazyPut<HomeController>(
-      () => HomeController(),
-    );
-    Get.lazyPut<DashboardController>(
-      () => DashboardController(),
-    );
-    Get.lazyPut<ServicesController>(
-      () => ServicesController(),
-    );
-    Get.lazyPut<AppointmentsController>(
-      () => AppointmentsController(),
-    );
+    Get.lazyPut<HomeController>(() => HomeController());
+    Get.lazyPut<DashboardController>(() => DashboardController());
+    Get.lazyPut<ServicesController>(() => ServicesController());
+    Get.lazyPut<MenuController>(() => MenuController());
+    Get.put(ProductCategoryController(), permanent: true);
   }
 }

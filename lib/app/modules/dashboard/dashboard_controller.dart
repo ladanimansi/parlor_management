@@ -8,6 +8,11 @@ class DashboardController extends GetxController {
   final dailyAppointments = <AppointmentModel>[].obs;
   final focusedDay = DateTime.now().obs;
   final selectedDay = DateTime.now().obs;
+  final isExpanded = false.obs;
+
+  void toggleExpand() {
+    isExpanded.value = !isExpanded.value;
+  }
 
   @override
   void onInit() {
@@ -20,7 +25,7 @@ class DashboardController extends GetxController {
   void _filterAppointments() {
     dailyAppointments.assignAll(
       _appointmentService.allAppointments
-          .where((app) => isSameDay(app.visitingDateTime, selectedDay.value))
+          .where((app) => isSameDay(app.bookingDateTime, selectedDay.value))
           .toList(),
     );
   }

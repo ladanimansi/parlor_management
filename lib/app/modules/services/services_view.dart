@@ -60,6 +60,7 @@ class ServicesView extends GetView<ServicesController> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: "services_fab",
         onPressed: () => _showServiceForm(),
         backgroundColor: AppColors.primary,
         child: const Icon(Icons.add, color: Colors.white),

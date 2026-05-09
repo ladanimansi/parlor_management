@@ -15,15 +15,15 @@ class HomeView extends GetView<HomeController> {
     final List<Widget> pages = [
       const DashboardView(),
       const ServicesView(),
-      const AppointmentsView(),
+      const MenuView(),
       const ProfileView(),
     ];
 
     return Scaffold(
-      body: Obx(() => IndexedStack(
-            index: controller.currentIndex.value,
-            children: pages,
-          )),
+      body: Obx(
+        () =>
+            IndexedStack(index: controller.currentIndex.value, children: pages),
+      ),
       bottomNavigationBar: Obx(() {
         return Container(
           decoration: BoxDecoration(
@@ -55,7 +55,7 @@ class HomeView extends GetView<HomeController> {
               ),
               BottomNavigationBarItem(
                 icon: const Icon(Icons.list_alt),
-                label: "bookings".tr,
+                label: "Menu".tr,
               ),
               BottomNavigationBarItem(
                 icon: const Icon(Icons.person),

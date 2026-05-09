@@ -27,7 +27,7 @@ class BookAppointmentController extends GetxController {
   final bookingDate = DateTime.now().obs;
   final bookingTime = TimeOfDay.now().obs;
 
-  final selectedCategory = 'General'.obs;
+  final selectedCategories = <String>[].obs;
   final selectedStatus = 'Inquiry'.obs;
 
   final categories = ['General', 'Hair', 'Skin Care', 'Makeup', 'Nail Care', 'Spa'];
@@ -57,9 +57,10 @@ class BookAppointmentController extends GetxController {
     referenceByController = TextEditingController();
     
     if (initialDate != null) {
-      visitingDate.value = initialDate;
+      bookingDate.value = initialDate;
     }
-    // bookingDate remains now
+    selectedCategories.assignAll(['General']);
+    // visitingDate remains now
   }
 
   void _prefillData(AppointmentModel appointment) {
@@ -76,7 +77,9 @@ class BookAppointmentController extends GetxController {
     bookingDate.value = appointment.bookingDateTime;
     bookingTime.value = TimeOfDay.fromDateTime(appointment.bookingDateTime);
 
-    selectedCategory.value = appointment.category;
+    selectedCategories.assignAll(
+      appointment.category.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList()
+    );
     selectedStatus.value = appointment.status;
   }
 
@@ -97,7 +100,13 @@ class BookAppointmentController extends GetxController {
   void updateBookingDate(DateTime date) => bookingDate.value = date;
   void updateBookingTime(TimeOfDay time) => bookingTime.value = time;
 
-  void updateCategory(String category) => selectedCategory.value = category;
+  void toggleCategory(String category) {
+    if (selectedCategories.contains(category)) {
+      selectedCategories.remove(category);
+    } else {
+      selectedCategories.add(category);
+    }
+  }
   void updateStatus(String status) => selectedStatus.value = status;
 
   void saveAppointment() {
@@ -124,7 +133,7 @@ class BookAppointmentController extends GetxController {
       clientName: clientNameController.text,
       mobileNumber: mobileNumberController.text,
       serviceName: serviceNameController.text,
-      category: selectedCategory.value,
+      category: selectedCategories.isEmpty ? 'General' : selectedCategories.join(', '),
       visitingDateTime: finalVisitingDateTime,
       bookingDateTime: finalBookingDateTime,
       status: selectedStatus.value,

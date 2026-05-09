@@ -20,8 +20,8 @@ class DashboardView extends GetView<DashboardController> {
       ),
       body: Column(
         children: [
-          _buildCalendar(),
-          const SizedBox(height: 10),
+          Obx(() => controller.isExpanded.value ? const SizedBox.shrink() : _buildCalendar()),
+          Obx(() => controller.isExpanded.value ? const SizedBox.shrink() : const SizedBox(height: 10)),
           Expanded(
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -39,8 +39,37 @@ class DashboardView extends GetView<DashboardController> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 25),
-                  _buildHeaderRow(),
+                  GestureDetector(
+                    onVerticalDragUpdate: (details) {
+                      if (details.delta.dy < -2) {
+                        controller.isExpanded.value = true;
+                      } else if (details.delta.dy > 2) {
+                        controller.isExpanded.value = false;
+                      }
+                    },
+                    child: Container(
+                      color: Colors.transparent,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Center(
+                            child: GestureDetector(
+                              onTap: controller.toggleExpand,
+                              child: Padding(
+                                padding: const EdgeInsets.only(top: 10, bottom: 10),
+                                child: Obx(() => Icon(
+                                      controller.isExpanded.value ? Icons.keyboard_arrow_down : Icons.keyboard_arrow_up,
+                                      color: Colors.grey,
+                                      size: 30,
+                                    )),
+                              ),
+                            ),
+                          ),
+                          _buildHeaderRow(),
+                        ],
+                      ),
+                    ),
+                  ),
                   const SizedBox(height: 15),
                   Expanded(child: _buildAppointmentList()),
                 ],
@@ -50,6 +79,7 @@ class DashboardView extends GetView<DashboardController> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
+        heroTag: "dashboard_fab",
         onPressed: () => Get.toNamed(Routes.BOOK_APPOINTMENT, arguments: controller.selectedDay.value),
         backgroundColor: AppColors.primary,
         child: const Icon(Icons.add, color: Colors.white),
@@ -119,7 +149,7 @@ class DashboardView extends GetView<DashboardController> {
                   Column(
                     children: [
                       Text(
-                        DateFormat('hh:mm').format(appointment.visitingDateTime),
+                        DateFormat('hh:mm').format(appointment.bookingDateTime),
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 16,
@@ -127,7 +157,7 @@ class DashboardView extends GetView<DashboardController> {
                         ),
                       ),
                       Text(
-                        DateFormat('a').format(appointment.visitingDateTime),
+                        DateFormat('a').format(appointment.bookingDateTime),
                         style: const TextStyle(color: Colors.grey, fontSize: 12),
                       ),
                     ],
@@ -150,9 +180,12 @@ class DashboardView extends GetView<DashboardController> {
                           children: [
                             const Icon(Icons.person_outline, size: 14, color: Colors.grey),
                             const SizedBox(width: 4),
-                            Text(
-                              appointment.clientName,
-                              style: const TextStyle(color: Colors.grey, fontSize: 13),
+                            Expanded(
+                              child: Text(
+                                appointment.clientName,
+                                style: const TextStyle(color: Colors.grey, fontSize: 13),
+                                overflow: TextOverflow.ellipsis,
+                              ),
                             ),
                           ],
                         ),

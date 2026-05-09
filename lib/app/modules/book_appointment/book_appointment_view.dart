@@ -13,7 +13,11 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(controller.isEdit.value ? "edit_appointment".tr : "book_appointment".tr),
+        title: Text(
+          controller.isEdit.value
+              ? "edit_appointment".tr
+              : "book_appointment".tr,
+        ),
         leading: IconButton(
           icon: const Icon(Icons.close),
           onPressed: () => Get.back(),
@@ -100,33 +104,32 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
               CustomCard(
                 child: Column(
                   children: [
-                    Obx(() => DropdownButtonFormField<String>(
-                          value: controller.selectedCategory.value,
-                          items: controller.categories.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
-                          onChanged: (v) => controller.updateCategory(v!),
-                          decoration: InputDecoration(
-                            labelText: "service_category".tr,
-                            prefixIcon: const Icon(Icons.category_outlined),
-                          ),
-                        )),
-                    const SizedBox(height: 15),
-                    TextFormField(
-                      controller: controller.serviceNameController,
-                      decoration: InputDecoration(
-                        labelText: "service_name".tr,
-                        prefixIcon: const Icon(Icons.spa_outlined),
-                      ),
-                      validator: (v) => v!.isEmpty ? "required_field".tr : null,
-                    ),
-                    const SizedBox(height: 15),
-                    TextFormField(
-                      controller: controller.amountController,
-                      decoration: InputDecoration(
-                        labelText: "amount".tr,
-                        prefixIcon: const Icon(Icons.currency_rupee),
-                      ),
-                      keyboardType: TextInputType.number,
-                      validator: (v) => v!.isEmpty ? "required_field".tr : null,
+                    InkWell(
+                      onTap: () => _showMultiSelectCategoryDialog(context),
+                      child: Obx(() => InputDecorator(
+                            decoration: InputDecoration(
+                              labelText: "service_category".tr,
+                              prefixIcon: const Icon(Icons.category_outlined),
+                              suffixIcon: const Icon(Icons.arrow_drop_down),
+                            ),
+                            child: controller.selectedCategories.isEmpty
+                                ? Text("select_category".tr, style: const TextStyle(color: Colors.grey))
+                                : Wrap(
+                                    spacing: 6.0,
+                                    runSpacing: -8.0,
+                                    children: controller.selectedCategories.map((c) {
+                                      return Chip(
+                                        label: Text(c, style: const TextStyle(fontSize: 12)),
+                                        padding: EdgeInsets.zero,
+                                        visualDensity: VisualDensity.compact,
+                                        backgroundColor: AppColors.primary.withOpacity(0.1),
+                                        deleteIcon: const Icon(Icons.close, size: 14),
+                                        onDeleted: () => controller.toggleCategory(c),
+                                        side: BorderSide.none,
+                                      );
+                                    }).toList(),
+                                  ),
+                          )),
                     ),
                   ],
                 ),
@@ -154,28 +157,33 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
                       ),
                     ),
                     const SizedBox(height: 15),
-                    Obx(() => DropdownButtonFormField<String>(
-                          value: controller.selectedStatus.value,
-                          items: controller.statuses.map((s) {
-                            final dummyApp = AppointmentModel(
-                              id: '', 
-                              clientName: '', 
-                              mobileNumber: '', 
-                              serviceName: '', 
-                              category: '', 
-                              visitingDateTime: DateTime.now(), 
-                              bookingDateTime: DateTime.now(),
-                              status: s, 
-                              amount: 0,
-                            );
-                            return DropdownMenuItem(value: s, child: Text(dummyApp.statusKey.tr));
-                          }).toList(),
-                          onChanged: (v) => controller.updateStatus(v!),
-                          decoration: InputDecoration(
-                            labelText: "status".tr,
-                            prefixIcon: const Icon(Icons.info_outline),
-                          ),
-                        )),
+                    Obx(
+                      () => DropdownButtonFormField<String>(
+                        value: controller.selectedStatus.value,
+                        items: controller.statuses.map((s) {
+                          final dummyApp = AppointmentModel(
+                            id: '',
+                            clientName: '',
+                            mobileNumber: '',
+                            serviceName: '',
+                            category: '',
+                            visitingDateTime: DateTime.now(),
+                            bookingDateTime: DateTime.now(),
+                            status: s,
+                            amount: 0,
+                          );
+                          return DropdownMenuItem(
+                            value: s,
+                            child: Text(dummyApp.statusKey.tr),
+                          );
+                        }).toList(),
+                        onChanged: (v) => controller.updateStatus(v!),
+                        decoration: InputDecoration(
+                          labelText: "status".tr,
+                          prefixIcon: const Icon(Icons.info_outline),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -188,11 +196,16 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
                     padding: const EdgeInsets.symmetric(vertical: 18),
                     backgroundColor: AppColors.primary,
                     foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
                   ),
                   child: Text(
                     controller.isEdit.value ? "save_changes".tr : "book_now".tr,
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ),
@@ -201,6 +214,56 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
           ),
         ),
       ),
+    );
+  }
+
+  void _showMultiSelectCategoryDialog(BuildContext context) {
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: Text(
+                "service_category".tr,
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primary),
+              ),
+            ),
+            const Divider(),
+            Flexible(
+              child: SingleChildScrollView(
+                child: Obx(() => Column(
+                  children: controller.categories.map((c) {
+                    final isSelected = controller.selectedCategories.contains(c);
+                    return CheckboxListTile(
+                      title: Text(c),
+                      value: isSelected,
+                      activeColor: AppColors.primary,
+                      onChanged: (bool? value) {
+                        controller.toggleCategory(c);
+                      },
+                    );
+                  }).toList(),
+                )),
+              ),
+            ),
+            const SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: () => Get.back(),
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+              child: Text("done".tr, style: const TextStyle(color: Colors.white)),
+            ),
+            const SizedBox(height: 10),
+          ],
+        ),
+      ),
+      isScrollControlled: true,
     );
   }
 
@@ -213,34 +276,38 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
     Function(TimeOfDay)? onTimeChanged,
     bool isTime = false,
   }) {
-    return Obx(() => ListTile(
-          title: Text(title),
-          subtitle: Text(
-            isTime 
-              ? timeObs!.value.format(context) 
-              : DateFormat('dd MMM yyyy').format(dateObs!.value)
-          ),
-          leading: Icon(isTime ? Icons.access_time_outlined : Icons.calendar_today_outlined),
-          trailing: Icon(isTime ? Icons.edit : Icons.edit_calendar, size: 20),
-          contentPadding: EdgeInsets.zero,
-          onTap: () async {
-            if (isTime) {
-              final time = await showTimePicker(
-                context: context,
-                initialTime: timeObs!.value,
-              );
-              if (time != null) onTimeChanged!(time);
-            } else {
-              final date = await showDatePicker(
-                context: context,
-                initialDate: dateObs!.value,
-                firstDate: DateTime.now().subtract(const Duration(days: 365)),
-                lastDate: DateTime.now().add(const Duration(days: 365)),
-              );
-              if (date != null) onDateChanged!(date);
-            }
-          },
-        ));
+    return Obx(
+      () => ListTile(
+        title: Text(title),
+        subtitle: Text(
+          isTime
+              ? timeObs!.value.format(context)
+              : DateFormat('dd MMM yyyy').format(dateObs!.value),
+        ),
+        leading: Icon(
+          isTime ? Icons.access_time_outlined : Icons.calendar_today_outlined,
+        ),
+        trailing: Icon(isTime ? Icons.edit : Icons.edit_calendar, size: 20),
+        contentPadding: EdgeInsets.zero,
+        onTap: () async {
+          if (isTime) {
+            final time = await showTimePicker(
+              context: context,
+              initialTime: timeObs!.value,
+            );
+            if (time != null) onTimeChanged!(time);
+          } else {
+            final date = await showDatePicker(
+              context: context,
+              initialDate: dateObs!.value,
+              firstDate: DateTime.now().subtract(const Duration(days: 365)),
+              lastDate: DateTime.now().add(const Duration(days: 365)),
+            );
+            if (date != null) onDateChanged!(date);
+          }
+        },
+      ),
+    );
   }
 
   Widget _buildSectionTitle(String title) {
