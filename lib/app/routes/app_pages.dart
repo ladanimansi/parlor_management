@@ -15,6 +15,16 @@ import '../modules/product_item/product_item_binding.dart';
 import '../modules/product_item/product_item_view.dart';
 import '../modules/product_category/add_product_category_view.dart';
 import '../modules/product_item/add_product_item_view.dart';
+import '../modules/order_preparation/order_preparation_binding.dart';
+import '../modules/order_preparation/order_preparation_view.dart';
+import '../modules/orders/orders_binding.dart';
+import '../modules/orders/orders_view.dart';
+import '../modules/staff/staff_binding.dart';
+import '../modules/staff/staff_view.dart';
+import '../modules/staff/add_staff_binding.dart';
+import '../modules/staff/add_staff_view.dart';
+import '../modules/order_allocation/order_allocation_binding.dart';
+import '../modules/order_allocation/order_allocation_view.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -66,6 +76,31 @@ class AppPages {
       name: _Paths.ADD_PRODUCT_ITEM,
       page: () => const AddProductItemView(),
     ),
+    GetPage(
+      name: _Paths.ORDER_PREPARATION,
+      page: () => const OrderPreparationView(),
+      binding: OrderPreparationBinding(),
+    ),
+    GetPage(
+      name: _Paths.ORDERS,
+      page: () => const OrdersView(),
+      binding: OrdersBinding(),
+    ),
+    GetPage(
+      name: _Paths.STAFF,
+      page: () => const StaffView(),
+      binding: StaffBinding(),
+    ),
+    GetPage(
+      name: _Paths.ADD_STAFF,
+      page: () => const AddStaffView(),
+      binding: AddStaffBinding(),
+    ),
+    GetPage(
+      name: _Paths.ORDER_ALLOCATION,
+      page: () => const OrderAllocationView(),
+      binding: OrderAllocationBinding(),
+    ),
   ];
 }
 
@@ -79,4 +114,9 @@ abstract class _Paths {
   static const PRODUCT_ITEM = '/product-item';
   static const ADD_PRODUCT_CATEGORY = '/add-product-category';
   static const ADD_PRODUCT_ITEM = '/add-product-item';
+  static const ORDER_PREPARATION = '/order-preparation';
+  static const ORDERS = '/orders';
+  static const STAFF = '/staff';
+  static const ADD_STAFF = '/add-staff';
+  static const ORDER_ALLOCATION = '/order-allocation';
 }

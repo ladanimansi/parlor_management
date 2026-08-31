@@ -36,6 +36,54 @@ class MenuView extends GetView<MenuController> {
               ),
             ],
           ),
+          const SizedBox(height: 10),
+          ExpansionTile(
+            leading: const Icon(Icons.people, color: AppColors.primary),
+            title: Text(
+              "staff_master".tr,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            children: [
+              ListTile(
+                leading: const Icon(Icons.people_outline, color: Colors.grey),
+                title: Text("staff".tr),
+                onTap: () {
+                  Get.toNamed(Routes.STAFF);
+                },
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          ExpansionTile(
+            leading: const Icon(Icons.shopping_cart, color: AppColors.primary),
+            title: Text(
+              "orders_master".tr,
+              style: const TextStyle(fontWeight: FontWeight.bold),
+            ),
+            children: [
+              ListTile(
+                leading: const Icon(Icons.assignment_outlined, color: Colors.grey),
+                title: Text("preparation".tr),
+                onTap: () {
+                  Get.toNamed(Routes.ORDER_PREPARATION);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.people_outline, color: Colors.grey),
+                title: Text("allocation".tr),
+                onTap: () {
+                  Get.toNamed(Routes.ORDER_ALLOCATION);
+                },
+              ),
+              ListTile(
+                leading: const Icon(Icons.list_alt_outlined, color: Colors.grey),
+                title: Text("orders".tr),
+                onTap: () {
+                  Get.toNamed(Routes.ORDERS);
+                },
+              ),
+            ],
+          ),
         ],
       ),
     );

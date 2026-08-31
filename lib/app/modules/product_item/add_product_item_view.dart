@@ -12,7 +12,9 @@ class AddProductItemView extends StatefulWidget {
 }
 
 class _AddProductItemViewState extends State<AddProductItemView> {
-  final ProductItemController controller = Get.find<ProductItemController>();
+  final ProductItemController controller = Get.isRegistered<ProductItemController>()
+      ? Get.find<ProductItemController>()
+      : Get.put(ProductItemController());
   final ProductCategoryController categoryController = Get.find<ProductCategoryController>();
   late final bool isEdit;
   late final Map<String, dynamic>? item;

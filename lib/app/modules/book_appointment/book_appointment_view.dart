@@ -30,163 +30,769 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Flow Selector (Quick Bill vs. Pre-Booking)
+              // Booking Type Selector (Scrollable horizontally)
+              Obx(() {
+                final selectedType = controller.selectedBookingType.value;
+                final types = [
+                  {
+                    'name': 'Walk in orders',
+                    'key': 'walk_in_orders',
+                    'icon': Icons.directions_walk,
+                  },
+                  {
+                    'name': 'Advance appoinment',
+                    'key': 'advance_appointment',
+                    'icon': Icons.calendar_month,
+                  },
+                  {
+                    'name': 'Bridal Orders',
+                    'key': 'bridal_orders',
+                    'icon': Icons.auto_awesome,
+                  },
+                  {
+                    'name': 'Package',
+                    'key': 'package',
+                    'icon': Icons.card_membership,
+                  },
+                  {
+                    'name': 'Home service',
+                    'key': 'home_service',
+                    'icon': Icons.home,
+                  },
+                ];
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "flow_type".tr,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimaryLight,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    SizedBox(
+                      height: 52,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: types.length,
+                        itemBuilder: (context, index) {
+                          final type = types[index];
+                          final typeName = type['name'] as String;
+                          final isSelected = selectedType == typeName;
+                          final icon = type['icon'] as IconData;
+                          final labelKey = type['key'] as String;
+
+                          return Padding(
+                            padding: const EdgeInsets.only(
+                              right: 8.0,
+                              bottom: 4.0,
+                            ),
+                            child: GestureDetector(
+                              onTap: () =>
+                                  controller.selectBookingType(typeName),
+                              child: AnimatedContainer(
+                                duration: const Duration(milliseconds: 200),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 10,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: isSelected
+                                      ? AppColors.primary
+                                      : Colors.white,
+                                  borderRadius: BorderRadius.circular(15),
+                                  border: Border.all(
+                                    color: isSelected
+                                        ? AppColors.primary
+                                        : Colors.grey.shade200,
+                                    width: 1.5,
+                                  ),
+                                  boxShadow: isSelected
+                                      ? [
+                                          BoxShadow(
+                                            color: AppColors.primary
+                                                .withOpacity(0.2),
+                                            blurRadius: 6,
+                                            offset: const Offset(0, 3),
+                                          ),
+                                        ]
+                                      : null,
+                                ),
+                                child: Row(
+                                  children: [
+                                    Icon(
+                                      icon,
+                                      size: 16,
+                                      color: isSelected
+                                          ? Colors.white
+                                          : Colors.grey.shade600,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    Text(
+                                      labelKey.tr,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 13,
+                                        color: isSelected
+                                            ? Colors.white
+                                            : Colors.grey.shade700,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 15),
+                  ],
+                );
+              }),
               _buildSectionTitle("client_details".tr),
               CustomCard(
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    TextFormField(
-                      controller: controller.clientNameController,
-                      decoration: InputDecoration(
-                        labelText: "client_name".tr,
-                        prefixIcon: const Icon(Icons.person_outline),
+                    // Dynamic Customer Status Badge
+                    Obx(() {
+                      final isNew = controller.isNewCustomer.value;
+                      final mobile = controller.mobileNumberController.text;
+                      if (mobile.length < 10) return const SizedBox.shrink();
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 12.0),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                          decoration: BoxDecoration(
+                            color: isNew ? Colors.orange.withOpacity(0.1) : Colors.green.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: isNew ? Colors.orange : Colors.green),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Icon(
+                                isNew ? Icons.person_add_outlined : Icons.check_circle_outline,
+                                size: 14,
+                                color: isNew ? Colors.orange.shade700 : Colors.green.shade700,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                isNew ? "New Customer (Registration)" : "Existing Customer Profile",
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: isNew ? Colors.orange.shade800 : Colors.green.shade800,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    }),
+                    Obx(
+                      () => TextFormField(
+                        controller: controller.mobileNumberController,
+                        decoration: InputDecoration(
+                          labelText: controller.isQuickBill
+                              ? "${'mobile_number'.tr} (Optional)"
+                              : 'mobile_number'.tr,
+                          prefixIcon: const Icon(Icons.phone_outlined),
+                        ),
+                        keyboardType: TextInputType.phone,
+                        validator: (v) {
+                          if (controller.isQuickBill) return null;
+                          return v!.isEmpty ? "required_field".tr : null;
+                        },
                       ),
-                      validator: (v) => v!.isEmpty ? "required_field".tr : null,
                     ),
+                    Obx(
+                      () => TextFormField(
+                        controller: controller.clientNameController,
+                        decoration: InputDecoration(
+                          labelText: controller.isQuickBill
+                              ? "${'client_name'.tr} (Optional)"
+                              : 'client_name'.tr,
+                          prefixIcon: const Icon(Icons.person_outline),
+                        ),
+                        validator: (v) {
+                          if (controller.isQuickBill) return null;
+                          return v!.isEmpty ? "required_field".tr : null;
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    // Age & Gender Fields
+                    Obx(() {
+                      return Row(
+                        children: [
+                          Expanded(
+                            child: TextFormField(
+                              decoration: const InputDecoration(
+                                labelText: "Age",
+                                prefixIcon: Icon(Icons.cake_outlined),
+                              ),
+                              keyboardType: TextInputType.number,
+                              initialValue: controller.clientAge.value?.toString() ?? '',
+                              onChanged: (val) {
+                                controller.clientAge.value = int.tryParse(val);
+                              },
+                              key: ValueKey('age_${controller.clientAge.value}'), 
+                            ),
+                          ),
+                          const SizedBox(width: 15),
+                          Expanded(
+                            child: DropdownButtonFormField<String>(
+                              value: controller.clientGender.value.isEmpty ? null : controller.clientGender.value,
+                              hint: const Text("Gender"),
+                              decoration: const InputDecoration(
+                                prefixIcon: Icon(Icons.people_outline),
+                                contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                              ),
+                              items: const [
+                                DropdownMenuItem(value: 'Female', child: Text("Female")),
+                                DropdownMenuItem(value: 'Male', child: Text("Male")),
+                                DropdownMenuItem(value: 'Other', child: Text("Other")),
+                              ],
+                              onChanged: (val) {
+                                controller.clientGender.value = val ?? '';
+                              },
+                            ),
+                          ),
+                        ],
+                      );
+                    }),
+                    const SizedBox(height: 10),
+                    // Other Remarks / Info Profile
+                    Obx(() => TextFormField(
+                      decoration: const InputDecoration(
+                        labelText: "Customer Remarks / Skin & Hair Info",
+                        prefixIcon: Icon(Icons.info_outline),
+                        hintText: "e.g., Sensitive skin, dry hair",
+                      ),
+                      initialValue: controller.clientOtherInfo.value,
+                      onChanged: (val) {
+                        controller.clientOtherInfo.value = val;
+                      },
+                      key: ValueKey('info_${controller.clientOtherInfo.value}'),
+                    )),
+                    const SizedBox(height: 10),
+                  ],
+                ),
+              ),
+
+              // Collapsible History Card
+              Obx(() {
+                if (controller.previousAppointments.isEmpty) {
+                  return const SizedBox.shrink();
+                }
+
+                final count = controller.previousAppointments.length;
+                final isExpanded = controller.isHistoryExpanded.value;
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
                     const SizedBox(height: 15),
-                    TextFormField(
-                      controller: controller.mobileNumberController,
-                      decoration: InputDecoration(
-                        labelText: "mobile_number".tr,
-                        prefixIcon: const Icon(Icons.phone_outlined),
+                    Card(
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                        side: const BorderSide(color: AppColors.primary, width: 1.0),
                       ),
-                      keyboardType: TextInputType.phone,
-                      validator: (v) => v!.isEmpty ? "required_field".tr : null,
+                      color: AppColors.primary.withOpacity(0.05),
+                      child: Column(
+                        children: [
+                          ListTile(
+                            leading: const Icon(Icons.history, color: AppColors.primary),
+                            title: Text(
+                              "History ($count previous orders)",
+                              style: const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                            trailing: Icon(
+                              isExpanded ? Icons.expand_less : Icons.expand_more,
+                              color: AppColors.primary,
+                            ),
+                            onTap: () => controller.isHistoryExpanded.toggle(),
+                          ),
+                          if (isExpanded) ...[
+                            const Divider(height: 1),
+                            ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemCount: count,
+                              itemBuilder: (context, index) {
+                                final app = controller.previousAppointments[index];
+                                final dateStr = DateFormat('dd MMM yyyy, hh:mm a').format(app.bookingDateTime);
+                                
+                                return Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                  decoration: BoxDecoration(
+                                    border: index == count - 1
+                                        ? null
+                                        : Border(
+                                            bottom: BorderSide(
+                                              color: Colors.grey.shade100,
+                                              width: 1,
+                                            ),
+                                          ),
+                                  ),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              app.serviceName,
+                                              style: const TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 14,
+                                              ),
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                            ),
+                                          ),
+                                          Text(
+                                            "₹${app.amount.toStringAsFixed(0)}",
+                                            style: const TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 14,
+                                              color: AppColors.accent,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Builder(
+                                        builder: (context) {
+                                          String staffInfo = 'Staff: ';
+                                          if (app.serviceAllocations.isNotEmpty) {
+                                            staffInfo += app.serviceAllocations
+                                                .map((sa) => "${sa.serviceName} (${sa.staffName ?? 'Pending'})")
+                                                .join(', ');
+                                          } else {
+                                            staffInfo += app.allocatedStaffName ?? 'Pending Staff Allocation';
+                                          }
+                                          return Text(
+                                            staffInfo,
+                                            style: TextStyle(fontSize: 12, color: Colors.grey.shade700, fontWeight: FontWeight.w500),
+                                          );
+                                        },
+                                      ),
+                                      const SizedBox(height: 6),
+                                      Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Row(
+                                            children: [
+                                              Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                                decoration: BoxDecoration(
+                                                  color: AppColors.primary.withOpacity(0.1),
+                                                  borderRadius: BorderRadius.circular(6),
+                                                ),
+                                                child: Text(
+                                                  app.bookingType.tr,
+                                                  style: const TextStyle(
+                                                    fontSize: 10,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: AppColors.primary,
+                                                  ),
+                                                ),
+                                              ),
+                                              const SizedBox(width: 8),
+                                              Text(
+                                                dateStr,
+                                                style: TextStyle(
+                                                  fontSize: 11,
+                                                  color: Colors.grey.shade600,
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          Row(
+                                            children: [
+                                              Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                                decoration: BoxDecoration(
+                                                  color: app.paymentStatus.toLowerCase() == 'paid' 
+                                                      ? Colors.green.withOpacity(0.1) 
+                                                      : Colors.orange.withOpacity(0.1),
+                                                  borderRadius: BorderRadius.circular(6),
+                                                ),
+                                                child: Text(
+                                                  app.paymentStatus,
+                                                  style: TextStyle(
+                                                    fontSize: 10,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: app.paymentStatus.toLowerCase() == 'paid' ? Colors.green : Colors.orange,
+                                                  ),
+                                                ),
+                                              ),
+                                              const SizedBox(width: 6),
+                                              Container(
+                                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                                decoration: BoxDecoration(
+                                                  color: app.statusColor.withOpacity(0.1),
+                                                  borderRadius: BorderRadius.circular(6),
+                                                ),
+                                                child: Text(
+                                                  app.statusKey.tr,
+                                                  style: TextStyle(
+                                                    fontSize: 10,
+                                                    fontWeight: FontWeight.bold,
+                                                    color: app.statusColor,
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                );
+                              },
+                            ),
+                          ],
+                        ],
+                      ),
                     ),
                   ],
-                ),
-              ),
-              const SizedBox(height: 25),
-              _buildSectionTitle("visiting_details".tr),
-              CustomCard(
-                child: Column(
+                );
+              }),
+
+              // Visiting Details (Only visible in Pre-Booking mode)
+              Obx(() {
+                if (controller.isQuickBill) return const SizedBox.shrink();
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildDateTimePicker(
-                      context,
-                      title: "visiting_date".tr,
-                      dateObs: controller.visitingDate,
-                      onDateChanged: controller.updateVisitingDate,
-                    ),
-                    const Divider(),
-                    _buildDateTimePicker(
-                      context,
-                      title: "visiting_time".tr,
-                      timeObs: controller.visitingTime,
-                      onTimeChanged: controller.updateVisitingTime,
-                      isTime: true,
+                    const SizedBox(height: 25),
+                    _buildSectionTitle("visiting_details".tr),
+                    CustomCard(
+                      child: Column(
+                        children: [
+                          _buildDateTimePicker(
+                            context,
+                            title: "visiting_date".tr,
+                            dateObs: controller.visitingDate,
+                            onDateChanged: controller.updateVisitingDate,
+                          ),
+                          const Divider(),
+                          _buildDateTimePicker(
+                            context,
+                            title: "visiting_time".tr,
+                            timeObs: controller.visitingTime,
+                            onTimeChanged: controller.updateVisitingTime,
+                            isTime: true,
+                          ),
+                        ],
+                      ),
                     ),
                   ],
-                ),
-              ),
-              const SizedBox(height: 25),
-              _buildSectionTitle("order_details".tr),
-              CustomCard(
-                child: Column(
+                );
+              }),
+
+              // Order Details (Only visible in Pre-Booking mode)
+              Obx(() {
+                if (controller.isQuickBill) return const SizedBox.shrink();
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildDateTimePicker(
-                      context,
-                      title: "order_date".tr,
-                      dateObs: controller.bookingDate,
-                      onDateChanged: controller.updateBookingDate,
-                    ),
-                    const Divider(),
-                    _buildDateTimePicker(
-                      context,
-                      title: "order_time".tr,
-                      timeObs: controller.bookingTime,
-                      onTimeChanged: controller.updateBookingTime,
-                      isTime: true,
+                    const SizedBox(height: 25),
+                    _buildSectionTitle("order_details".tr),
+                    CustomCard(
+                      child: Column(
+                        children: [
+                          _buildDateTimePicker(
+                            context,
+                            title: "order_date".tr,
+                            dateObs: controller.bookingDate,
+                            onDateChanged: controller.updateBookingDate,
+                          ),
+                          const Divider(),
+                          _buildDateTimePicker(
+                            context,
+                            title: "order_time".tr,
+                            timeObs: controller.bookingTime,
+                            onTimeChanged: controller.updateBookingTime,
+                            isTime: true,
+                          ),
+                        ],
+                      ),
                     ),
                   ],
-                ),
-              ),
+                );
+              }),
+
               const SizedBox(height: 25),
               _buildSectionTitle("service_details".tr),
               CustomCard(
                 child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    InkWell(
-                      onTap: () => _showMultiSelectCategoryDialog(context),
-                      child: Obx(() => InputDecorator(
-                            decoration: InputDecoration(
-                              labelText: "service_category".tr,
-                              prefixIcon: const Icon(Icons.category_outlined),
-                              suffixIcon: const Icon(Icons.arrow_drop_down),
-                            ),
-                            child: controller.selectedCategories.isEmpty
-                                ? Text("select_category".tr, style: const TextStyle(color: Colors.grey))
-                                : Wrap(
-                                    spacing: 6.0,
-                                    runSpacing: -8.0,
-                                    children: controller.selectedCategories.map((c) {
-                                      return Chip(
-                                        label: Text(c, style: const TextStyle(fontSize: 12)),
-                                        padding: EdgeInsets.zero,
-                                        visualDensity: VisualDensity.compact,
-                                        backgroundColor: AppColors.primary.withOpacity(0.1),
-                                        deleteIcon: const Icon(Icons.close, size: 14),
-                                        onDeleted: () => controller.toggleCategory(c),
-                                        side: BorderSide.none,
-                                      );
-                                    }).toList(),
+                    FormField<List<String>>(
+                      validator: (v) => controller.selectedServices.isEmpty
+                          ? "required_field".tr
+                          : null,
+                      builder: (state) {
+                        return Obx(() {
+                          final errorText = state.errorText;
+                          final hasError =
+                              errorText != null &&
+                              controller.selectedServices.isEmpty;
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              InkWell(
+                                onTap: () =>
+                                    _showMultiSelectServiceDialog(context),
+                                child: InputDecorator(
+                                  decoration: InputDecoration(
+                                    labelText: "service_category".tr,
+                                    prefixIcon: const Icon(
+                                      Icons.category_outlined,
+                                    ),
+                                    suffixIcon: const Icon(
+                                      Icons.arrow_drop_down,
+                                    ),
+                                    errorText: hasError ? errorText : null,
                                   ),
-                          )),
+                                  child: controller.selectedServices.isEmpty
+                                      ? Text(
+                                          "select_service".tr,
+                                          style: const TextStyle(
+                                            color: Colors.grey,
+                                          ),
+                                        )
+                                      : Wrap(
+                                          spacing: 6.0,
+                                          runSpacing: -8.0,
+                                          children: controller.selectedServices
+                                              .map((categoryName) {
+                                                return Chip(
+                                                  label: Text(
+                                                    categoryName,
+                                                    style: const TextStyle(
+                                                      fontSize: 12,
+                                                    ),
+                                                  ),
+                                                  padding: EdgeInsets.zero,
+                                                  visualDensity:
+                                                      VisualDensity.compact,
+                                                  backgroundColor: AppColors
+                                                      .primary
+                                                      .withOpacity(0.1),
+                                                  deleteIcon: const Icon(
+                                                    Icons.close,
+                                                    size: 14,
+                                                  ),
+                                                  onDeleted: () =>
+                                                      controller.toggleService(
+                                                        categoryName,
+                                                      ),
+                                                  side: BorderSide.none,
+                                                );
+                                              })
+                                              .toList(),
+                                        ),
+                                ),
+                              ),
+                            ],
+                          );
+                        });
+                      },
                     ),
+                    const SizedBox(height: 15),
+                    TextFormField(
+                      controller: controller.amountController,
+                      decoration: const InputDecoration(
+                        labelText: "Total Bill Amount (₹)",
+                        prefixIcon: Icon(Icons.currency_rupee),
+                      ),
+                      keyboardType: TextInputType.number,
+                    ),
+
+                    Obx(() {
+                      if (controller.isQuickBill)
+                        return const SizedBox.shrink();
+                      return Column(
+                        children: [
+                          const SizedBox(height: 15),
+                          InkWell(
+                            onTap: () =>
+                                _showMultiSelectCategoryDialog(context),
+                            child: InputDecorator(
+                              decoration: InputDecoration(
+                                labelText: "service_category".tr,
+                                prefixIcon: const Icon(Icons.category_outlined),
+                                suffixIcon: const Icon(Icons.arrow_drop_down),
+                              ),
+                              child: controller.selectedCategories.isEmpty
+                                  ? Text(
+                                      "select_category".tr,
+                                      style: const TextStyle(
+                                        color: Colors.grey,
+                                      ),
+                                    )
+                                  : Wrap(
+                                      spacing: 6.0,
+                                      runSpacing: -8.0,
+                                      children: controller.selectedCategories
+                                          .map((c) {
+                                            return Chip(
+                                              label: Text(
+                                                c,
+                                                style: const TextStyle(
+                                                  fontSize: 12,
+                                                ),
+                                              ),
+                                              padding: EdgeInsets.zero,
+                                              visualDensity:
+                                                  VisualDensity.compact,
+                                              backgroundColor: AppColors.primary
+                                                  .withOpacity(0.1),
+                                              deleteIcon: const Icon(
+                                                Icons.close,
+                                                size: 14,
+                                              ),
+                                              onDeleted: () =>
+                                                  controller.toggleCategory(c),
+                                              side: BorderSide.none,
+                                            );
+                                          })
+                                          .toList(),
+                                    ),
+                            ),
+                          ),
+                        ],
+                      );
+                    }),
                   ],
                 ),
               ),
-              const SizedBox(height: 25),
-              _buildSectionTitle("additional_info".tr),
-              CustomCard(
-                child: Column(
+
+              // Required Products Checklist (Stage 1)
+              Obx(() {
+                if (controller.availableProducts.isEmpty) {
+                  return const SizedBox.shrink();
+                }
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    TextFormField(
-                      controller: controller.notesController,
-                      decoration: InputDecoration(
-                        labelText: "notes".tr,
-                        prefixIcon: const Icon(Icons.note_alt_outlined),
-                      ),
-                      maxLines: 3,
-                    ),
-                    const SizedBox(height: 15),
-                    TextFormField(
-                      controller: controller.referenceByController,
-                      decoration: InputDecoration(
-                        labelText: "reference_by".tr,
-                        prefixIcon: const Icon(Icons.group_outlined),
-                        hintText: "e.g., Instagram, Friend, Google",
-                      ),
-                    ),
-                    const SizedBox(height: 15),
-                    Obx(
-                      () => DropdownButtonFormField<String>(
-                        value: controller.selectedStatus.value,
-                        items: controller.statuses.map((s) {
-                          final dummyApp = AppointmentModel(
-                            id: '',
-                            clientName: '',
-                            mobileNumber: '',
-                            serviceName: '',
-                            category: '',
-                            visitingDateTime: DateTime.now(),
-                            bookingDateTime: DateTime.now(),
-                            status: s,
-                            amount: 0,
-                          );
-                          return DropdownMenuItem(
-                            value: s,
-                            child: Text(dummyApp.statusKey.tr),
-                          );
-                        }).toList(),
-                        onChanged: (v) => controller.updateStatus(v!),
-                        decoration: InputDecoration(
-                          labelText: "status".tr,
-                          prefixIcon: const Icon(Icons.info_outline),
-                        ),
+                    const SizedBox(height: 25),
+                    _buildSectionTitle("Required Products / Materials"),
+                    CustomCard(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          const Padding(
+                            padding: EdgeInsets.only(bottom: 10.0),
+                            child: Text(
+                              "Products required for selected services. Auto-selected based on Service Master configuration, but can be manually overridden.",
+                              style: TextStyle(fontSize: 12, color: Colors.grey),
+                            ),
+                          ),
+                          const Divider(),
+                          ...controller.availableProducts.map((prod) {
+                            final id = prod['id']?.toString() ?? '';
+                            final name = prod['name']?.toString() ?? '';
+                            final price = prod['price']?.toString() ?? '';
+                            final isSelected = controller.selectedProductIds.contains(id);
+                            return CheckboxListTile(
+                              title: Text(name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
+                              subtitle: Text("Price: ₹$price", style: const TextStyle(fontSize: 12, color: AppColors.accent)),
+                              value: isSelected,
+                              activeColor: AppColors.primary,
+                              onChanged: (val) => controller.toggleProductSelection(id),
+                              controlAffinity: ListTileControlAffinity.leading,
+                              contentPadding: EdgeInsets.zero,
+                            );
+                          }).toList(),
+                        ],
                       ),
                     ),
                   ],
-                ),
+                );
+              }),
+
+              // Remarks & Notes Section (Stage 1 Remarks)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 25),
+                  _buildSectionTitle("additional_info".tr),
+                  CustomCard(
+                    child: Column(
+                      children: [
+                        TextFormField(
+                          controller: controller.notesController,
+                          decoration: const InputDecoration(
+                            labelText: "Remarks / Special Instructions",
+                            prefixIcon: Icon(Icons.note_alt_outlined),
+                            hintText: "Enter any remarks or special requests...",
+                          ),
+                          maxLines: 3,
+                        ),
+                        Obx(() {
+                          if (controller.isQuickBill) return const SizedBox.shrink();
+                          return Column(
+                            children: [
+                              const SizedBox(height: 15),
+                              TextFormField(
+                                controller: controller.referenceByController,
+                                decoration: InputDecoration(
+                                  labelText: "reference_by".tr,
+                                  prefixIcon: const Icon(Icons.group_outlined),
+                                  hintText: "e.g., Instagram, Friend, Google",
+                                ),
+                              ),
+                              const SizedBox(height: 15),
+                              DropdownButtonFormField<String>(
+                                value: controller.selectedStatus.value,
+                                items: controller.statuses.map((s) {
+                                  final dummyApp = AppointmentModel(
+                                    id: '',
+                                    clientName: '',
+                                    mobileNumber: '',
+                                    serviceName: '',
+                                    category: '',
+                                    visitingDateTime: DateTime.now(),
+                                    bookingDateTime: DateTime.now(),
+                                    status: s,
+                                    amount: 0,
+                                  );
+                                  return DropdownMenuItem(
+                                    value: s,
+                                    child: Text(dummyApp.statusKey.tr),
+                                  );
+                                }).toList(),
+                                onChanged: (v) => controller.updateStatus(v!),
+                                decoration: InputDecoration(
+                                  labelText: "status".tr,
+                                  prefixIcon: const Icon(Icons.info_outline),
+                                ),
+                              ),
+                            ],
+                          );
+                        }),
+                      ],
+                    ),
+                  ),
+                ],
               ),
+
               const SizedBox(height: 40),
               SizedBox(
                 width: double.infinity,
@@ -201,7 +807,30 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
                     ),
                   ),
                   child: Text(
-                    controller.isEdit.value ? "save_changes".tr : "book_now".tr,
+                    "save_order".tr,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 12),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () =>
+                      controller.saveAppointment(goToPreparation: true),
+                  style: ElevatedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(vertical: 18),
+                    backgroundColor: AppColors.secondary,
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                  ),
+                  child: Text(
+                    "save_and_preparation".tr,
                     style: const TextStyle(
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
@@ -232,32 +861,155 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: Text(
                 "service_category".tr,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primary),
+                style: const TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primary,
+                ),
               ),
             ),
             const Divider(),
             Flexible(
               child: SingleChildScrollView(
-                child: Obx(() => Column(
-                  children: controller.categories.map((c) {
-                    final isSelected = controller.selectedCategories.contains(c);
-                    return CheckboxListTile(
-                      title: Text(c),
-                      value: isSelected,
-                      activeColor: AppColors.primary,
-                      onChanged: (bool? value) {
-                        controller.toggleCategory(c);
-                      },
-                    );
-                  }).toList(),
-                )),
+                child: Obx(
+                  () => Column(
+                    children: controller.categories.map((c) {
+                      final isSelected = controller.selectedCategories.contains(
+                        c,
+                      );
+                      return CheckboxListTile(
+                        title: Text(c),
+                        value: isSelected,
+                        activeColor: AppColors.primary,
+                        onChanged: (bool? value) {
+                          controller.toggleCategory(c);
+                        },
+                      );
+                    }).toList(),
+                  ),
+                ),
               ),
             ),
             const SizedBox(height: 10),
             ElevatedButton(
               onPressed: () => Get.back(),
-              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
-              child: Text("done".tr, style: const TextStyle(color: Colors.white)),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+              ),
+              child: Text(
+                "done".tr,
+                style: const TextStyle(color: Colors.white),
+              ),
+            ),
+            const SizedBox(height: 10),
+          ],
+        ),
+      ),
+      isScrollControlled: true,
+    );
+  }
+
+  void _showMultiSelectServiceDialog(BuildContext context) {
+    controller.serviceSearchQuery.value = '';
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.symmetric(vertical: 20),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "services".tr,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close),
+                    onPressed: () => Get.back(),
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 5),
+              child: TextField(
+                decoration: InputDecoration(
+                  hintText: "Search service...",
+                  prefixIcon: const Icon(Icons.search),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(15),
+                  ),
+                  contentPadding: const EdgeInsets.symmetric(vertical: 10),
+                ),
+                onChanged: (val) => controller.serviceSearchQuery.value = val,
+              ),
+            ),
+            const Divider(),
+            Flexible(
+              child: SingleChildScrollView(
+                child: Obx(() {
+                  final cats = controller.filteredCategories;
+                  if (cats.isEmpty) {
+                    return const Padding(
+                      padding: EdgeInsets.all(20.0),
+                      child: Text("No categories found"),
+                    );
+                  }
+                  return Column(
+                    children: cats.map((categoryName) {
+                      final isSelected = controller.selectedServices.contains(
+                        categoryName,
+                      );
+                      return CheckboxListTile(
+                        title: Text(
+                          categoryName,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w500,
+                            fontSize: 15,
+                          ),
+                        ),
+                        value: isSelected,
+                        activeColor: AppColors.primary,
+                        onChanged: (bool? value) {
+                          controller.toggleService(categoryName);
+                        },
+                      );
+                    }).toList(),
+                  );
+                }),
+              ),
+            ),
+            const SizedBox(height: 10),
+            ElevatedButton(
+              onPressed: () => Get.back(),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.primary,
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 40,
+                  vertical: 12,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(15),
+                ),
+              ),
+              child: Text(
+                "done".tr,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
             ),
             const SizedBox(height: 10),
           ],

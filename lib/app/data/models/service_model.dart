@@ -6,6 +6,7 @@ class ServiceModel {
   final String category;
   final String description;
   final String? image;
+  final List<String> requiredProductIds;
 
   ServiceModel({
     required this.id,
@@ -15,5 +16,6 @@ class ServiceModel {
     required this.category,
     required this.description,
     this.image,
+    this.requiredProductIds = const [],
   });
 }

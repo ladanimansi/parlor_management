@@ -259,6 +259,9 @@ class DashboardView extends GetView<DashboardController> {
                     amount: appointment.amount,
                     notes: appointment.notes,
                     referenceBy: appointment.referenceBy,
+                    allocatedStaffId: appointment.allocatedStaffId,
+                    allocatedStaffName: appointment.allocatedStaffName,
+                    bookingType: appointment.bookingType,
                   ));
                 },
               );

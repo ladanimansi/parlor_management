@@ -18,6 +18,7 @@ class ServiceRepository {
         duration: '1 Hour',
         category: 'Skin Care',
         description: 'Premium gold facial for a long-lasting glow and refreshments.',
+        requiredProductIds: const ['1'],
       ),
       ServiceModel(
         id: '3',
