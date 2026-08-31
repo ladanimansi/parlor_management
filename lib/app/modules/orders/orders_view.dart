@@ -17,54 +17,98 @@ class OrdersView extends GetView<OrdersController> {
       backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
         title: Text(
-          "orders".tr,
+          "Live Orders",
           style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimaryLight),
         ),
         backgroundColor: Colors.white,
         elevation: 0.5,
         iconTheme: const IconThemeData(color: AppColors.primary),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.add_circle_outline, color: AppColors.primary, size: 28),
+            tooltip: "New Order",
+            onPressed: () => Get.toNamed(Routes.BOOK_APPOINTMENT),
+          ),
+        ],
       ),
       body: Column(
         children: [
-          // Elegant Search Bar
-          Padding(
-            padding: const EdgeInsets.all(16.0),
-            child: Container(
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(15),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.04),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
-              child: TextField(
-                onChanged: (value) => controller.searchQuery.value = value,
-                decoration: InputDecoration(
-                  hintText: "Search client name, mobile or category...",
-                  prefixIcon: const Icon(Icons.search, color: AppColors.primary),
-                  contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                  border: OutlineInputBorder(
+          // Top Search & Filter Bar Section
+          Container(
+            color: Colors.white,
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
+            child: Column(
+              children: [
+                // Search Input
+                Container(
+                  decoration: BoxDecoration(
+                    color: AppColors.backgroundLight,
                     borderRadius: BorderRadius.circular(15),
-                    borderSide: BorderSide.none,
                   ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                    borderSide: BorderSide.none,
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(15),
-                    borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                  child: TextField(
+                    onChanged: (value) => controller.searchQuery.value = value,
+                    decoration: InputDecoration(
+                      hintText: "Search client, phone or service...",
+                      prefixIcon: const Icon(Icons.search, color: AppColors.primary),
+                      contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                      border: InputBorder.none,
+                    ),
                   ),
                 ),
-              ),
+                const SizedBox(height: 12),
+                
+                // Status Filter Tab Chips
+                Obx(() {
+                  final currentTab = controller.activeTab.value;
+                  final tabs = [
+                    {'key': 'All', 'label': 'All Orders'},
+                    {'key': 'InProgress', 'label': 'In Progress'},
+                    {'key': 'PendingAllocation', 'label': 'Pending Staff'},
+                    {'key': 'Completed', 'label': 'Completed'},
+                  ];
+
+                  return SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: tabs.map((t) {
+                        final key = t['key']!;
+                        final label = t['label']!;
+                        final isSelected = currentTab == key;
+
+                        return Padding(
+                          padding: const EdgeInsets.only(right: 8.0),
+                          child: ChoiceChip(
+                            label: Text(
+                              label,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 12,
+                                color: isSelected ? Colors.white : Colors.grey.shade700,
+                              ),
+                            ),
+                            selected: isSelected,
+                            selectedColor: AppColors.primary,
+                            backgroundColor: AppColors.backgroundLight,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              side: BorderSide(
+                                color: isSelected ? AppColors.primary : Colors.grey.shade300,
+                              ),
+                            ),
+                            onSelected: (_) => controller.activeTab.value = key,
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  );
+                }),
+              ],
             ),
           ),
 
-          // Orders list
+          const SizedBox(height: 8),
+
+          // Live Orders List
           Expanded(
             child: Obx(() {
               final orders = controller.filteredOrders;
@@ -76,8 +120,19 @@ class OrdersView extends GetView<OrdersController> {
                       Icon(Icons.receipt_long_outlined, size: 64, color: Colors.grey.shade300),
                       const SizedBox(height: 16),
                       Text(
-                        "No orders found",
+                        "No live orders found",
                         style: TextStyle(fontSize: 16, color: Colors.grey.shade600, fontWeight: FontWeight.w500),
+                      ),
+                      const SizedBox(height: 12),
+                      ElevatedButton.icon(
+                        onPressed: () => Get.toNamed(Routes.BOOK_APPOINTMENT),
+                        icon: const Icon(Icons.add, size: 18),
+                        label: const Text("Create Walk-in Order"),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        ),
                       ),
                     ],
                   ),
@@ -85,353 +140,342 @@ class OrdersView extends GetView<OrdersController> {
               }
 
               return ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.fromLTRB(16, 8, 16, 80),
                 itemCount: orders.length,
                 itemBuilder: (context, index) {
                   final order = orders[index];
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 16.0),
-                    child: CustomCard(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          // Top row: Client name and Status Badge
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  order.clientName,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.textPrimaryLight,
-                                  ),
-                                ),
-                              ),
-                              Row(
-                                mainAxisSize: MainAxisSize.min,
-                                children: [
-                                  GestureDetector(
-                                    onTap: () => _showPaymentPicker(order),
-                                    child: _buildPaymentBadge(order),
-                                  ),
-                                  const SizedBox(width: 6),
-                                  GestureDetector(
-                                    onTap: () => _showStatusPicker(order),
-                                    child: _buildStatusBadge(order),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                          
-                          const SizedBox(height: 4),
-
-                          // Demographic information (Gender, Age, Remarks)
-                          if ((order.clientAge != null) || 
-                              (order.clientGender != null && order.clientGender!.isNotEmpty) || 
-                              (order.clientOtherInfo != null && order.clientOtherInfo!.isNotEmpty))
-                            Text(
-                              "${order.clientGender ?? ''}${order.clientAge != null ? ', ${order.clientAge} yrs' : ''}${order.clientOtherInfo != null && order.clientOtherInfo!.isNotEmpty ? ' (${order.clientOtherInfo})' : ''}",
-                              style: TextStyle(color: Colors.grey.shade600, fontSize: 13, fontStyle: FontStyle.italic),
-                            ),
-
-                          const SizedBox(height: 8),
-
-                          // Mobile Number & Date Row
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              if (order.mobileNumber.isNotEmpty)
-                                Row(
-                                  children: [
-                                    const Icon(Icons.phone_outlined, size: 14, color: Colors.grey),
-                                    const SizedBox(width: 4),
-                                    Text(
-                                      order.mobileNumber,
-                                      style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
-                                    ),
-                                  ],
-                                )
-                              else
-                                const SizedBox.shrink(),
-                              Row(
-                                children: [
-                                  const Icon(Icons.calendar_today_outlined, size: 14, color: Colors.grey),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    DateFormat('dd MMM yyyy, hh:mm a').format(order.bookingDateTime),
-                                    style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-
-                          // Products Selection Display
-                          if (order.selectedProducts != null && order.selectedProducts!.isNotEmpty)
-                            Padding(
-                              padding: const EdgeInsets.only(top: 8.0),
-                              child: Row(
-                                children: [
-                                  const Icon(Icons.inventory_2_outlined, size: 14, color: AppColors.primary),
-                                  const SizedBox(width: 6),
-                                  Expanded(
-                                    child: Text(
-                                      "Products: ${order.selectedProducts}",
-                                      style: TextStyle(color: Colors.grey.shade700, fontSize: 12, fontWeight: FontWeight.w500),
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                          const SizedBox(height: 12),
-                          const Divider(height: 1, thickness: 0.5),
-                          const SizedBox(height: 12),
-
-                          // Service-wise Execution Checklist (Stage 3)
-                          if (order.serviceAllocations.isNotEmpty) ...[
-                            Text(
-                              "Execution Status",
-                              style: TextStyle(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.grey.shade400,
-                              ),
-                            ),
-                            const SizedBox(height: 6),
-                            ...order.serviceAllocations.map((alloc) {
-                              Color stateColor;
-                              if (alloc.status == 'Completed') {
-                                stateColor = Colors.purple;
-                              } else if (alloc.status == 'Running') {
-                                stateColor = Colors.orange;
-                              } else {
-                                stateColor = Colors.blue;
-                              }
-                              
-                              final hasStaff = alloc.staffName != null && alloc.staffName!.isNotEmpty;
-                              
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 8.0),
-                                child: Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: Colors.grey.shade50,
-                                    borderRadius: BorderRadius.circular(10),
-                                    border: Border.all(color: Colors.grey.shade100),
-                                  ),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Text(
-                                              alloc.serviceName,
-                                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
-                                            ),
-                                            const SizedBox(height: 2),
-                                            Text(
-                                              hasStaff ? "Staff: ${alloc.staffName}" : "Staff: Unallocated",
-                                              style: TextStyle(
-                                                fontSize: 12, 
-                                                color: hasStaff ? Colors.grey.shade700 : Colors.red.shade700,
-                                                fontWeight: hasStaff ? FontWeight.normal : FontWeight.bold,
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                      Row(
-                                        children: [
-                                          Container(
-                                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                            decoration: BoxDecoration(
-                                              color: stateColor.withOpacity(0.1),
-                                              borderRadius: BorderRadius.circular(6),
-                                            ),
-                                            child: Text(
-                                              alloc.status,
-                                              style: TextStyle(color: stateColor, fontSize: 10, fontWeight: FontWeight.bold),
-                                            ),
-                                          ),
-                                          const SizedBox(width: 8),
-                                          // Transition Buttons
-                                          if (alloc.status == 'Waiting')
-                                            IconButton(
-                                              icon: const Icon(Icons.play_circle_fill_outlined, color: Colors.green, size: 24),
-                                              onPressed: hasStaff 
-                                                  ? () => controller.startService(order, alloc.serviceId)
-                                                  : null,
-                                              tooltip: hasStaff ? "Start Service" : "Allocate staff first",
-                                            )
-                                          else if (alloc.status == 'Running')
-                                            IconButton(
-                                              icon: const Icon(Icons.check_circle, color: Colors.purple, size: 24),
-                                              onPressed: () => controller.completeService(order, alloc.serviceId),
-                                              tooltip: "Complete Service",
-                                            )
-                                          else
-                                            const Icon(Icons.check_circle, color: Colors.purple, size: 22),
-                                        ],
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                              );
-                            }).toList(),
-                          ] else ...[
-                            // Fallback Services / Prepared Items Row
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Icon(Icons.spa_outlined, size: 18, color: AppColors.primary),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        "Services / Items",
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.grey.shade500,
-                                        ),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        order.serviceName,
-                                        style: const TextStyle(
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.bold,
-                                          color: AppColors.textPrimaryLight,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Text(
-                                  "₹${order.amount.toStringAsFixed(0)}",
-                                  style: const TextStyle(
-                                    fontSize: 20,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.accent,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-
-                          const SizedBox(height: 10),
-                          
-                          // Subtotal bill and Real-time order modifiers
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                "Bill Total: ₹${order.amount.toStringAsFixed(0)}",
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 16,
-                                  color: AppColors.accent,
-                                ),
-                              ),
-                              Row(
-                                children: [
-                                  // Add Service on-the-fly
-                                  TextButton.icon(
-                                    onPressed: () => _showAddServiceDialog(context, order),
-                                    icon: const Icon(Icons.add, size: 14, color: AppColors.primary),
-                                    label: const Text(
-                                      "Add Service",
-                                      style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold, fontSize: 12),
-                                    ),
-                                  ),
-                                  const SizedBox(width: 4),
-                                  // Payment collection
-                                  TextButton.icon(
-                                    onPressed: () => _showPaymentPicker(order),
-                                    icon: const Icon(Icons.payment, size: 14, color: Colors.green),
-                                    label: const Text(
-                                      "Collect Payment",
-                                      style: TextStyle(color: Colors.green, fontWeight: FontWeight.bold, fontSize: 12),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-
-                          const SizedBox(height: 12),
-                          const Divider(height: 1, thickness: 0.5),
-                          const SizedBox(height: 12),
-
-                          // Action Buttons Row
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.end,
-                            children: [
-                              // Go to Preparation Button
-                              TextButton.icon(
-                                onPressed: () {
-                                  final firstCategory = order.category.split(',').first.trim();
-                                  Get.toNamed(Routes.ORDER_PREPARATION, arguments: {
-                                    'category': firstCategory.isEmpty ? 'All' : firstCategory,
-                                    'appointmentId': order.id,
-                                  });
-                                },
-                                icon: const Icon(Icons.assignment_outlined, size: 16, color: AppColors.primary),
-                                label: Text(
-                                  "preparation".tr,
-                                  style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              
-                              // Go to Allocation
-                              TextButton.icon(
-                                onPressed: () {
-                                  Get.toNamed(Routes.ORDER_ALLOCATION, arguments: {
-                                    'appointmentId': order.id,
-                                  });
-                                },
-                                icon: const Icon(Icons.people_outline, size: 16, color: AppColors.secondary),
-                                label: const Text(
-                                  "Allocation",
-                                  style: TextStyle(color: AppColors.secondary, fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              
-                              // Edit Order Button
-                              IconButton(
-                                icon: const Icon(Icons.edit_outlined, color: Colors.blue),
-                                onPressed: () => Get.toNamed(Routes.BOOK_APPOINTMENT, arguments: order),
-                              ),
-                              
-                              // Delete Button
-                              IconButton(
-                                icon: const Icon(Icons.delete_outline, color: Colors.red),
-                                onPressed: () => _confirmDelete(order.id),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
+                  return _buildModernOrderCard(context, order);
                 },
               );
             }),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => Get.toNamed(Routes.BOOK_APPOINTMENT),
+        backgroundColor: AppColors.primary,
+        icon: const Icon(Icons.add, color: Colors.white),
+        label: const Text("New Walk-in Order", style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+      ),
+    );
+  }
+
+  // --- MODERN STREAMLINED ORDER CARD ---
+  Widget _buildModernOrderCard(BuildContext context, AppointmentModel order) {
+    final initials = order.clientName.isNotEmpty ? order.clientName[0].toUpperCase() : 'C';
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 16.0),
+      child: CustomCard(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header: Avatar, Client Name, Booking Type & More Options Menu
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        radius: 20,
+                        backgroundColor: AppColors.primary.withOpacity(0.12),
+                        child: Text(
+                          initials,
+                          style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.primary, fontSize: 16),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              order.clientName,
+                              style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: AppColors.textPrimaryLight),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 2),
+                             Wrap(
+                              crossAxisAlignment: WrapCrossAlignment.center,
+                              spacing: 4,
+                              children: [
+                                if (order.mobileNumber.isNotEmpty) ...[
+                                  Text(
+                                    order.mobileNumber,
+                                    style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                                  ),
+                                  Text("•", style: TextStyle(color: Colors.grey.shade400)),
+                                ],
+                                Text(
+                                  DateFormat('hh:mm a').format(order.bookingDateTime),
+                                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        order.bookingType.tr,
+                        style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: AppColors.primary),
+                      ),
+                    ),
+                    PopupMenuButton<String>(
+                      icon: const Icon(Icons.more_vert, color: Colors.grey),
+                      onSelected: (val) {
+                        if (val == 'prepare') {
+                          final firstCategory = order.category.split(',').first.trim();
+                          Get.toNamed(Routes.ORDER_PREPARATION, arguments: {
+                            'category': firstCategory.isEmpty ? 'All' : firstCategory,
+                            'appointmentId': order.id,
+                          });
+                        } else if (val == 'allocate') {
+                          Get.toNamed(Routes.ORDER_ALLOCATION, arguments: {'appointmentId': order.id});
+                        } else if (val == 'edit') {
+                          Get.toNamed(Routes.BOOK_APPOINTMENT, arguments: order);
+                        } else if (val == 'delete') {
+                          _confirmDelete(order.id);
+                        }
+                      },
+                      itemBuilder: (context) => [
+                        const PopupMenuItem(
+                          value: 'allocate',
+                          child: ListTile(
+                            leading: Icon(Icons.person_add_alt_1_outlined, color: AppColors.secondary, size: 20),
+                            title: Text('Allocate Staff'),
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                        ),
+                        const PopupMenuItem(
+                          value: 'prepare',
+                          child: ListTile(
+                            leading: Icon(Icons.assignment_outlined, color: AppColors.primary, size: 20),
+                            title: Text('Prepare Products'),
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                        ),
+                        const PopupMenuItem(
+                          value: 'edit',
+                          child: ListTile(
+                            leading: Icon(Icons.edit_outlined, color: Colors.blue, size: 20),
+                            title: Text('Edit Order'),
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                        ),
+                        const PopupMenuItem(
+                          value: 'delete',
+                          child: ListTile(
+                            leading: Icon(Icons.delete_outline, color: Colors.red, size: 20),
+                            title: Text('Delete Order'),
+                            contentPadding: EdgeInsets.zero,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 12),
+            const Divider(height: 1, thickness: 0.5),
+            const SizedBox(height: 12),
+
+            // Services & Live Execution Progress List
+            if (order.serviceAllocations.isNotEmpty) ...[
+              Text(
+                "Services Execution",
+                style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey.shade500),
+              ),
+              const SizedBox(height: 8),
+              ...order.serviceAllocations.map((alloc) {
+                final hasStaff = alloc.staffName != null && alloc.staffName!.isNotEmpty;
+
+                Color statusBg;
+                Color statusColor;
+                if (alloc.status == 'Completed') {
+                  statusBg = Colors.purple.withOpacity(0.1);
+                  statusColor = Colors.purple;
+                } else if (alloc.status == 'Running') {
+                  statusBg = Colors.orange.withOpacity(0.1);
+                  statusColor = Colors.orange;
+                } else {
+                  statusBg = Colors.blue.withOpacity(0.1);
+                  statusColor = Colors.blue;
+                }
+
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 8.0),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: Colors.grey.shade200),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                alloc.serviceName,
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                              ),
+                              const SizedBox(height: 2),
+                              Row(
+                                children: [
+                                  Icon(
+                                    hasStaff ? Icons.person_outline : Icons.warning_amber_outlined,
+                                    size: 13,
+                                    color: hasStaff ? Colors.grey.shade600 : Colors.orange.shade700,
+                                  ),
+                                  const SizedBox(width: 4),
+                                  Expanded(
+                                    child: Text(
+                                      hasStaff ? alloc.staffName! : "Tap 'Allocate Staff' to assign",
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: hasStaff ? Colors.grey.shade700 : Colors.orange.shade800,
+                                        fontWeight: hasStaff ? FontWeight.w500 : FontWeight.bold,
+                                      ),
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+
+                        // Action Status Transition Button
+                        Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: statusBg,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                alloc.status,
+                                style: TextStyle(color: statusColor, fontSize: 11, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            if (alloc.status == 'Waiting')
+                              ElevatedButton.icon(
+                                onPressed: hasStaff ? () => controller.startService(order, alloc.serviceId) : null,
+                                icon: const Icon(Icons.play_arrow, size: 14, color: Colors.white),
+                                label: const Text("Start", style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white)),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.green,
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                  elevation: 0,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                ),
+                              )
+                            else if (alloc.status == 'Running')
+                              ElevatedButton.icon(
+                                onPressed: () => controller.completeService(order, alloc.serviceId),
+                                icon: const Icon(Icons.check, size: 14, color: Colors.white),
+                                label: const Text("Finish", style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white)),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: Colors.purple,
+                                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                  elevation: 0,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                                ),
+                              )
+                            else
+                              const Icon(Icons.check_circle, color: Colors.purple, size: 22),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+            ] else ...[
+              // General Services Fallback Text
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Expanded(
+                    child: Text(
+                      order.serviceName.isEmpty ? "General Services" : order.serviceName,
+                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: AppColors.textPrimaryLight),
+                    ),
+                  ),
+                  TextButton.icon(
+                    onPressed: () => Get.toNamed(Routes.ORDER_ALLOCATION, arguments: {'appointmentId': order.id}),
+                    icon: const Icon(Icons.person_add_alt_1_outlined, size: 14),
+                    label: const Text("Allocate Staff"),
+                  ),
+                ],
+              ),
+            ],
+
+            const SizedBox(height: 12),
+            const Divider(height: 1, thickness: 0.5),
+            const SizedBox(height: 12),
+
+            // Footer Bar: Total Bill, Payment Status Pill & + Add Extra Service Button
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text("Total Amount", style: TextStyle(fontSize: 11, color: Colors.grey.shade500, fontWeight: FontWeight.w500)),
+                    const SizedBox(height: 2),
+                    Text(
+                      "₹${order.amount.toStringAsFixed(0)}",
+                      style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.accent),
+                    ),
+                  ],
+                ),
+
+                Row(
+                  children: [
+                    // Payment Status Pill (Clickable)
+                    GestureDetector(
+                      onTap: () => _showPaymentPicker(order),
+                      child: _buildPaymentBadge(order),
+                    ),
+                    const SizedBox(width: 8),
+                    // Add Extra Service Button
+                    OutlinedButton.icon(
+                      onPressed: () => _showAddServiceDialog(context, order),
+                      icon: const Icon(Icons.add, size: 14, color: AppColors.primary),
+                      label: const Text("+ Extra", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: AppColors.primary)),
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: AppColors.primary),
+                        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -445,17 +489,24 @@ class OrdersView extends GetView<OrdersController> {
     } else {
       badgeColor = Colors.red;
     }
-    
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
         color: badgeColor.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: badgeColor.withOpacity(0.4), width: 0.8),
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: badgeColor.withOpacity(0.4), width: 1),
       ),
-      child: Text(
-        order.paymentStatus,
-        style: TextStyle(color: badgeColor, fontSize: 11, fontWeight: FontWeight.bold),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.payment, size: 12, color: badgeColor),
+          const SizedBox(width: 4),
+          Text(
+            order.paymentStatus,
+            style: TextStyle(color: badgeColor, fontSize: 11, fontWeight: FontWeight.bold),
+          ),
+        ],
       ),
     );
   }
@@ -467,7 +518,7 @@ class OrdersView extends GetView<OrdersController> {
         padding: const EdgeInsets.symmetric(vertical: 20),
         decoration: const BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -475,7 +526,7 @@ class OrdersView extends GetView<OrdersController> {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: Text(
-                "Update Payment Status (Bill: ₹${order.amount.toStringAsFixed(0)})",
+                "Collect Payment (Total Bill: ₹${order.amount.toStringAsFixed(0)})",
                 style: const TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: AppColors.primary),
               ),
             ),
@@ -489,10 +540,15 @@ class OrdersView extends GetView<OrdersController> {
               } else {
                 statusColor = Colors.red;
               }
+              final isSelected = order.paymentStatus == status;
+
               return ListTile(
-                leading: Icon(Icons.payment, color: statusColor),
+                leading: CircleAvatar(
+                  backgroundColor: statusColor.withOpacity(0.1),
+                  child: Icon(Icons.payment, color: statusColor, size: 18),
+                ),
                 title: Text(status, style: const TextStyle(fontWeight: FontWeight.bold)),
-                trailing: order.paymentStatus == status ? const Icon(Icons.check, color: AppColors.primary) : null,
+                trailing: isSelected ? const Icon(Icons.check_circle, color: Colors.green) : null,
                 onTap: () {
                   controller.updatePaymentStatus(order, status);
                   Get.back();
@@ -512,7 +568,7 @@ class OrdersView extends GetView<OrdersController> {
         padding: const EdgeInsets.symmetric(vertical: 20),
         decoration: const BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(25)),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -521,7 +577,7 @@ class OrdersView extends GetView<OrdersController> {
             const Padding(
               padding: EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: Text(
-                "Add Extra Service to Order",
+                "Add Extra Service to Current Bill",
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primary),
               ),
             ),
@@ -530,10 +586,12 @@ class OrdersView extends GetView<OrdersController> {
               child: Obx(() {
                 final services = servicesController.allServices;
                 if (services.isEmpty) {
-                  return const Center(child: Padding(
-                    padding: EdgeInsets.all(20.0),
-                    child: Text("No services available"),
-                  ));
+                  return const Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(20.0),
+                      child: Text("No services available"),
+                    ),
+                  );
                 }
                 return ListView.builder(
                   shrinkWrap: true,
@@ -541,9 +599,13 @@ class OrdersView extends GetView<OrdersController> {
                   itemBuilder: (context, index) {
                     final service = services[index];
                     return ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: AppColors.primary.withOpacity(0.1),
+                        child: const Icon(Icons.add_shopping_cart, color: AppColors.primary, size: 18),
+                      ),
                       title: Text(service.name, style: const TextStyle(fontWeight: FontWeight.bold)),
-                      subtitle: Text("Category: ${service.category} | Price: ₹${service.price}"),
-                      trailing: const Icon(Icons.add_circle_outline, color: AppColors.primary),
+                      subtitle: Text("Category: ${service.category} • ₹${service.price.toStringAsFixed(0)}"),
+                      trailing: const Icon(Icons.add_circle, color: AppColors.primary),
                       onTap: () {
                         controller.addServiceToOrder(order, service);
                         Get.back();
@@ -560,73 +622,11 @@ class OrdersView extends GetView<OrdersController> {
     );
   }
 
-  void _showStatusPicker(AppointmentModel appointment) {
-    final statuses = ['Inquiry', 'Confirm', 'InProgress', 'Completed', 'Cancelled'];
-    Get.bottomSheet(
-      Container(
-        padding: const EdgeInsets.symmetric(vertical: 20),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              child: Text(
-                "status".tr,
-                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.primary),
-              ),
-            ),
-            const Divider(),
-            ...statuses.map((s) {
-              final dummyApp = AppointmentModel(
-                id: '',
-                clientName: '',
-                mobileNumber: '',
-                serviceName: '',
-                category: '',
-                visitingDateTime: DateTime.now(),
-                bookingDateTime: DateTime.now(),
-                status: s,
-                amount: 0,
-              );
-              return ListTile(
-                leading: Icon(Icons.circle, color: dummyApp.statusColor, size: 16),
-                title: Text(dummyApp.statusKey.tr),
-                trailing: appointment.status == s ? const Icon(Icons.check, color: AppColors.primary) : null,
-                onTap: () {
-                  Get.back();
-                  controller.updateAppointment(appointment.copyWith(status: s));
-                },
-              );
-            }).toList(),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildStatusBadge(AppointmentModel appointment) {
-    final color = appointment.statusColor;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Text(
-        appointment.statusKey.tr,
-        style: TextStyle(color: color, fontSize: 12, fontWeight: FontWeight.bold),
-      ),
-    );
-  }
-
   void _confirmDelete(String id) {
     Get.dialog(
       AlertDialog(
         title: Text("confirm_delete".tr),
+        content: const Text("Are you sure you want to delete this order?"),
         actions: [
           TextButton(onPressed: () => Get.back(), child: Text("cancel".tr)),
           TextButton(
@@ -634,7 +634,7 @@ class OrdersView extends GetView<OrdersController> {
               controller.deleteAppointment(id);
               Get.back();
             },
-            child: Text("delete".tr, style: const TextStyle(color: Colors.red)),
+            child: Text("delete".tr, style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
           ),
         ],
       ),

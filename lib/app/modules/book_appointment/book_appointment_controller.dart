@@ -161,58 +161,75 @@ class BookAppointmentController extends GetxController {
     _onMobileChanged();
   }
 
+  String _lastAutoFilledMobile = '';
+
   void _onMobileChanged() {
-    final mobile = mobileNumberController.text.trim();
-    checkPreviousBookings(mobile);
-    _checkCustomerRegistration(mobile);
-  }
+    final rawMobile = mobileNumberController.text;
+    final cleanMobile = rawMobile.replaceAll(RegExp(r'\D'), '');
 
-  void _checkCustomerRegistration(String mobile) {
-    if (mobile.length < 10) {
-      isNewCustomer.value = true;
-      // Do not clear name if user is typing it out
-      return;
-    }
-    
-    final customer = _customerService.getCustomerByMobile(mobile);
-    if (customer != null) {
-      isNewCustomer.value = false;
-      clientNameController.text = customer.name;
-      clientAge.value = customer.age;
-      clientGender.value = customer.gender ?? '';
-      clientOtherInfo.value = customer.otherInfo ?? '';
-    } else {
-      isNewCustomer.value = true;
-      clientAge.value = null;
-      clientGender.value = '';
-      clientOtherInfo.value = '';
-    }
-  }
-
-  void checkPreviousBookings(String mobile) {
-    final cleanMobile = mobile.trim();
     if (cleanMobile.length < 10) {
+      isNewCustomer.value = true;
       previousAppointments.clear();
+      _lastAutoFilledMobile = '';
       return;
     }
-    
-    // Find all appointments matching this mobile number, excluding the current one if editing
+
+    // 1. Check previous appointments matching clean mobile number
     final matches = _appointmentService.allAppointments.where((app) {
-      final isSameMobile = app.mobileNumber.trim() == cleanMobile;
+      final appMobileClean = app.mobileNumber.replaceAll(RegExp(r'\D'), '');
+      final isSameMobile = appMobileClean == cleanMobile;
       final isDifferentId = !isEdit.value || app.id != selectedAppointment.value?.id;
       return isSameMobile && isDifferentId;
     }).toList();
-    
-    // Sort matches by date descending (latest first)
+
     matches.sort((a, b) => b.bookingDateTime.compareTo(a.bookingDateTime));
-    
     previousAppointments.assignAll(matches);
-    
-    // Autofill client name if matches exist and clientName is empty/default
-    if (matches.isNotEmpty && clientNameController.text.trim().isEmpty) {
-      clientNameController.text = matches.first.clientName;
+
+    // 2. Check Customer Service for registered profile
+    final customer = _customerService.getCustomerByMobile(rawMobile);
+
+    // 3. Auto-fill details if customer or previous appointment exists
+    if (_lastAutoFilledMobile != cleanMobile) {
+      if (customer != null) {
+        isNewCustomer.value = false;
+        clientNameController.text = customer.name;
+        clientAge.value = customer.age;
+        clientGender.value = customer.gender ?? '';
+        clientOtherInfo.value = customer.otherInfo ?? '';
+        _lastAutoFilledMobile = cleanMobile;
+
+        Get.snackbar(
+          "Customer Found",
+          "Customer profile auto-filled for '${customer.name}'",
+          duration: const Duration(seconds: 3),
+          snackPosition: SnackPosition.TOP,
+        );
+      } else if (matches.isNotEmpty) {
+        isNewCustomer.value = false;
+        final latest = matches.first;
+        if (clientNameController.text.trim().isEmpty || clientNameController.text == 'walkin_client'.tr) {
+          clientNameController.text = latest.clientName;
+        }
+        clientAge.value = latest.clientAge;
+        clientGender.value = latest.clientGender ?? '';
+        clientOtherInfo.value = latest.clientOtherInfo ?? '';
+        _lastAutoFilledMobile = cleanMobile;
+
+        Get.snackbar(
+          "Customer Found",
+          "Customer details auto-filled for '${latest.clientName}' from previous visits!",
+          duration: const Duration(seconds: 3),
+          snackPosition: SnackPosition.TOP,
+        );
+      } else {
+        isNewCustomer.value = true;
+      }
     }
   }
+
+  void _checkCustomerRegistration(String mobile) {}
+
+  void checkPreviousBookings(String mobile) {}
 
   void _initNewData(DateTime? initialDate) {
     clientNameController = TextEditingController();

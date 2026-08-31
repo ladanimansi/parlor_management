@@ -32,4 +32,23 @@ class StaffModel {
       status: map['status'] ?? true,
     );
   }
+
+  bool get isAvailable => status;
+  String get statusText => status ? 'Available' : 'Busy';
+
+  StaffModel copyWith({
+    String? id,
+    String? name,
+    String? mobileNumber,
+    List<String>? specialties,
+    bool? status,
+  }) {
+    return StaffModel(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      mobileNumber: mobileNumber ?? this.mobileNumber,
+      specialties: specialties ?? this.specialties,
+      status: status ?? this.status,
+    );
+  }
 }

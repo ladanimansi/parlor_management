@@ -8,15 +8,50 @@ import '../services/services_controller.dart';
 class OrderAllocationController extends GetxController {
   final AppointmentService _appointmentService = Get.find<AppointmentService>();
   final StaffService _staffService = Get.find<StaffService>();
+
   final searchQuery = ''.obs;
-  bool hasOpenedInitialAllocation = false;
+  final activeFilter = 'All'.obs; // 'All', 'Pending', 'Allocated'
+  final selectedOrder = Rxn<AppointmentModel>();
+
+  List<StaffModel> get allStaff => _staffService.allStaff.where((s) => s.status).toList();
+
+  @override
+  void onInit() {
+    super.onInit();
+    _handleArguments();
+  }
+
+  void _handleArguments() {
+    final args = Get.arguments;
+    String? targetId;
+    if (args is Map) {
+      targetId = args['appointmentId'];
+    } else if (args is String) {
+      targetId = args;
+    }
+
+    if (targetId != null) {
+      final orderIndex = allOrders.indexWhere((app) => app.id == targetId);
+      if (orderIndex != -1) {
+        selectedOrder.value = allOrders[orderIndex];
+      }
+    }
+  }
 
   List<AppointmentModel> get allOrders => _appointmentService.allAppointments;
 
   List<AppointmentModel> get filteredOrders {
     final query = searchQuery.value.toLowerCase().trim();
-    final list = List<AppointmentModel>.from(_appointmentService.allAppointments);
+    final filter = activeFilter.value;
+    
+    var list = List<AppointmentModel>.from(_appointmentService.allAppointments);
     list.sort((a, b) => b.bookingDateTime.compareTo(a.bookingDateTime));
+
+    if (filter == 'Pending') {
+      list = list.where((o) => _isOrderPendingAllocation(o)).toList();
+    } else if (filter == 'Allocated') {
+      list = list.where((o) => !_isOrderPendingAllocation(o)).toList();
+    }
 
     if (query.isEmpty) {
       return list;
@@ -32,17 +67,11 @@ class OrderAllocationController extends GetxController {
     }).toList();
   }
 
-  List<StaffModel> getMatchingStaff(AppointmentModel order) {
-    final orderCats = order.category.split(',').map((c) => c.trim().toLowerCase()).toList();
-    final matching = _staffService.allStaff.where((staff) {
-      if (!staff.status) return false;
-      return staff.specialties.any((spec) => orderCats.contains(spec.toLowerCase()));
-    }).toList();
-
-    if (matching.isEmpty) {
-      return _staffService.allStaff.where((staff) => staff.status).toList();
+  bool _isOrderPendingAllocation(AppointmentModel order) {
+    if (order.serviceAllocations.isNotEmpty) {
+      return order.serviceAllocations.any((sa) => sa.staffId == null || sa.staffId!.isEmpty);
     }
-    return matching;
+    return order.allocatedStaffId == null || order.allocatedStaffId!.isEmpty;
   }
 
   List<StaffModel> getMatchingStaffForService(String serviceName) {
@@ -51,29 +80,21 @@ class OrderAllocationController extends GetxController {
       final service = servicesController.allServices.firstWhereOrNull(
         (s) => s.name.toLowerCase() == serviceName.toLowerCase()
       );
-      if (service == null) return _staffService.allStaff.where((staff) => staff.status).toList();
+      if (service == null) return allStaff;
       
-      final matching = _staffService.allStaff.where((staff) {
-        if (!staff.status) return false;
+      final matching = allStaff.where((staff) {
         return staff.specialties.any((spec) => spec.toLowerCase() == service.category.toLowerCase());
       }).toList();
 
-      if (matching.isEmpty) {
-        return _staffService.allStaff.where((staff) => staff.status).toList();
-      }
+      if (matching.isEmpty) return allStaff;
       return matching;
     } catch (_) {
-      return _staffService.allStaff.where((staff) => staff.status).toList();
+      return allStaff;
     }
   }
 
-  void allocateStaff(AppointmentModel order, StaffModel? staff) {
-    // Deprecated for walk-in flow, but kept for compatibility
-    final updatedApp = order.copyWith(
-      allocatedStaffId: staff?.id,
-      allocatedStaffName: staff?.name,
-    );
-    _appointmentService.updateAppointment(updatedApp);
+  void selectOrderForAllocation(AppointmentModel? order) {
+    selectedOrder.value = order;
   }
 
   void allocateStaffToService(AppointmentModel order, String serviceId, StaffModel? staff) {
@@ -97,6 +118,45 @@ class OrderAllocationController extends GetxController {
       allocatedStaffName: staffNames.isEmpty ? null : staffNames,
       serviceAllocations: updatedAllocations,
     );
+    
     _appointmentService.updateAppointment(updatedApp);
+    // Keep live reference in selectedOrder
+    if (selectedOrder.value?.id == order.id) {
+      selectedOrder.value = updatedApp;
+    }
+  }
+
+  void autoAllocateRecommendedStaff(AppointmentModel order) {
+    if (order.serviceAllocations.isEmpty) return;
+
+    final updatedAllocations = order.serviceAllocations.map((alloc) {
+      if (alloc.staffId == null || alloc.staffId!.isEmpty) {
+        final matches = getMatchingStaffForService(alloc.serviceName);
+        if (matches.isNotEmpty) {
+          final recommendedStaff = matches.first;
+          return alloc.copyWith(
+            staffId: recommendedStaff.id,
+            staffName: recommendedStaff.name,
+          );
+        }
+      }
+      return alloc;
+    }).toList();
+
+    final staffNames = updatedAllocations
+        .map((sa) => sa.staffName)
+        .where((name) => name != null && name.isNotEmpty)
+        .toSet()
+        .join(', ');
+
+    final updatedApp = order.copyWith(
+      allocatedStaffName: staffNames.isEmpty ? null : staffNames,
+      serviceAllocations: updatedAllocations,
+    );
+
+    _appointmentService.updateAppointment(updatedApp);
+    selectedOrder.value = updatedApp;
+
+    Get.snackbar("Auto-Allocated", "Specialized staff matched automatically for all services!");
   }
 }

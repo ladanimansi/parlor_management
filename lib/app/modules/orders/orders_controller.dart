@@ -6,27 +6,40 @@ import '../../data/services/appointment_service.dart';
 class OrdersController extends GetxController {
   final AppointmentService _appointmentService = Get.find<AppointmentService>();
   final searchQuery = ''.obs;
+  final activeTab = 'All'.obs; // 'All', 'InProgress', 'PendingAllocation', 'Completed'
 
   List<AppointmentModel> get allOrders => _appointmentService.allAppointments;
 
   List<AppointmentModel> get filteredOrders {
     final query = searchQuery.value.toLowerCase().trim();
-    final list = List<AppointmentModel>.from(_appointmentService.allAppointments);
+    final tab = activeTab.value;
+    var list = List<AppointmentModel>.from(_appointmentService.allAppointments);
     list.sort((a, b) => b.bookingDateTime.compareTo(a.bookingDateTime));
+
+    if (tab == 'InProgress') {
+      list = list.where((o) => o.status == 'InProgress' || o.status == 'Confirm' || o.serviceAllocations.any((sa) => sa.status == 'Running')).toList();
+    } else if (tab == 'PendingAllocation') {
+      list = list.where((o) {
+        if (o.serviceAllocations.isNotEmpty) {
+          return o.serviceAllocations.any((sa) => sa.staffId == null || sa.staffId!.isEmpty);
+        }
+        return o.allocatedStaffId == null || o.allocatedStaffId!.isEmpty;
+      }).toList();
+    } else if (tab == 'Completed') {
+      list = list.where((o) => o.status == 'Completed').toList();
+    }
 
     if (query.isEmpty) {
       return list;
     }
     
-    final filtered = list.where((app) {
+    return list.where((app) {
       final matchesClient = app.clientName.toLowerCase().contains(query);
       final matchesMobile = app.mobileNumber.contains(query);
       final matchesCategory = app.category.toLowerCase().contains(query);
       final matchesServices = app.serviceName.toLowerCase().contains(query);
       return matchesClient || matchesMobile || matchesCategory || matchesServices;
     }).toList();
-
-    return filtered;
   }
 
   void updateAppointment(AppointmentModel app) {

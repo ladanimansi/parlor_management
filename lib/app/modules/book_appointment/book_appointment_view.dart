@@ -167,27 +167,42 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
                       return Padding(
                         padding: const EdgeInsets.only(bottom: 12.0),
                         child: Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 10,
+                            vertical: 5,
+                          ),
                           decoration: BoxDecoration(
-                            color: isNew ? Colors.orange.withOpacity(0.1) : Colors.green.withOpacity(0.1),
+                            color: isNew
+                                ? Colors.orange.withOpacity(0.1)
+                                : Colors.green.withOpacity(0.1),
                             borderRadius: BorderRadius.circular(8),
-                            border: Border.all(color: isNew ? Colors.orange : Colors.green),
+                            border: Border.all(
+                              color: isNew ? Colors.orange : Colors.green,
+                            ),
                           ),
                           child: Row(
                             mainAxisSize: MainAxisSize.min,
                             children: [
                               Icon(
-                                isNew ? Icons.person_add_outlined : Icons.check_circle_outline,
+                                isNew
+                                    ? Icons.person_add_outlined
+                                    : Icons.check_circle_outline,
                                 size: 14,
-                                color: isNew ? Colors.orange.shade700 : Colors.green.shade700,
+                                color: isNew
+                                    ? Colors.orange.shade700
+                                    : Colors.green.shade700,
                               ),
                               const SizedBox(width: 6),
                               Text(
-                                isNew ? "New Customer (Registration)" : "Existing Customer Profile",
+                                isNew
+                                    ? "New Customer (Registration)"
+                                    : "Existing Customer Profile",
                                 style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
-                                  color: isNew ? Colors.orange.shade800 : Colors.green.shade800,
+                                  color: isNew
+                                      ? Colors.orange.shade800
+                                      : Colors.green.shade800,
                                 ),
                               ),
                             ],
@@ -238,26 +253,42 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
                                 prefixIcon: Icon(Icons.cake_outlined),
                               ),
                               keyboardType: TextInputType.number,
-                              initialValue: controller.clientAge.value?.toString() ?? '',
+                              initialValue:
+                                  controller.clientAge.value?.toString() ?? '',
                               onChanged: (val) {
                                 controller.clientAge.value = int.tryParse(val);
                               },
-                              key: ValueKey('age_${controller.clientAge.value}'), 
+                              key: ValueKey(
+                                'age_${controller.clientAge.value}',
+                              ),
                             ),
                           ),
                           const SizedBox(width: 15),
                           Expanded(
                             child: DropdownButtonFormField<String>(
-                              value: controller.clientGender.value.isEmpty ? null : controller.clientGender.value,
+                              value: controller.clientGender.value.isEmpty
+                                  ? null
+                                  : controller.clientGender.value,
                               hint: const Text("Gender"),
                               decoration: const InputDecoration(
                                 prefixIcon: Icon(Icons.people_outline),
-                                contentPadding: EdgeInsets.symmetric(horizontal: 10),
+                                contentPadding: EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                ),
                               ),
                               items: const [
-                                DropdownMenuItem(value: 'Female', child: Text("Female")),
-                                DropdownMenuItem(value: 'Male', child: Text("Male")),
-                                DropdownMenuItem(value: 'Other', child: Text("Other")),
+                                DropdownMenuItem(
+                                  value: 'Female',
+                                  child: Text("Female"),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'Male',
+                                  child: Text("Male"),
+                                ),
+                                DropdownMenuItem(
+                                  value: 'Other',
+                                  child: Text("Other"),
+                                ),
                               ],
                               onChanged: (val) {
                                 controller.clientGender.value = val ?? '';
@@ -267,21 +298,6 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
                         ],
                       );
                     }),
-                    const SizedBox(height: 10),
-                    // Other Remarks / Info Profile
-                    Obx(() => TextFormField(
-                      decoration: const InputDecoration(
-                        labelText: "Customer Remarks / Skin & Hair Info",
-                        prefixIcon: Icon(Icons.info_outline),
-                        hintText: "e.g., Sensitive skin, dry hair",
-                      ),
-                      initialValue: controller.clientOtherInfo.value,
-                      onChanged: (val) {
-                        controller.clientOtherInfo.value = val;
-                      },
-                      key: ValueKey('info_${controller.clientOtherInfo.value}'),
-                    )),
-                    const SizedBox(height: 10),
                   ],
                 ),
               ),
@@ -303,13 +319,19 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
                       elevation: 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(15),
-                        side: const BorderSide(color: AppColors.primary, width: 1.0),
+                        side: const BorderSide(
+                          color: AppColors.primary,
+                          width: 1.0,
+                        ),
                       ),
                       color: AppColors.primary.withOpacity(0.05),
                       child: Column(
                         children: [
                           ListTile(
-                            leading: const Icon(Icons.history, color: AppColors.primary),
+                            leading: const Icon(
+                              Icons.history,
+                              color: AppColors.primary,
+                            ),
                             title: Text(
                               "History ($count previous orders)",
                               style: const TextStyle(
@@ -318,7 +340,9 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
                               ),
                             ),
                             trailing: Icon(
-                              isExpanded ? Icons.expand_less : Icons.expand_more,
+                              isExpanded
+                                  ? Icons.expand_less
+                                  : Icons.expand_more,
                               color: AppColors.primary,
                             ),
                             onTap: () => controller.isHistoryExpanded.toggle(),
@@ -330,11 +354,17 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
                               physics: const NeverScrollableScrollPhysics(),
                               itemCount: count,
                               itemBuilder: (context, index) {
-                                final app = controller.previousAppointments[index];
-                                final dateStr = DateFormat('dd MMM yyyy, hh:mm a').format(app.bookingDateTime);
-                                
+                                final app =
+                                    controller.previousAppointments[index];
+                                final dateStr = DateFormat(
+                                  'dd MMM yyyy, hh:mm a',
+                                ).format(app.bookingDateTime);
+
                                 return Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                    vertical: 12,
+                                  ),
                                   decoration: BoxDecoration(
                                     border: index == count - 1
                                         ? null
@@ -346,10 +376,12 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
                                           ),
                                   ),
                                   child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
                                     children: [
                                       Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
                                         children: [
                                           Expanded(
                                             child: Text(
@@ -376,30 +408,52 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
                                       Builder(
                                         builder: (context) {
                                           String staffInfo = 'Staff: ';
-                                          if (app.serviceAllocations.isNotEmpty) {
+                                          if (app
+                                              .serviceAllocations
+                                              .isNotEmpty) {
                                             staffInfo += app.serviceAllocations
-                                                .map((sa) => "${sa.serviceName} (${sa.staffName ?? 'Pending'})")
+                                                .map(
+                                                  (sa) =>
+                                                      "${sa.serviceName} (${sa.staffName ?? 'Pending'})",
+                                                )
                                                 .join(', ');
                                           } else {
-                                            staffInfo += app.allocatedStaffName ?? 'Pending Staff Allocation';
+                                            staffInfo +=
+                                                app.allocatedStaffName ??
+                                                'Pending Staff Allocation';
                                           }
                                           return Text(
                                             staffInfo,
-                                            style: TextStyle(fontSize: 12, color: Colors.grey.shade700, fontWeight: FontWeight.w500),
+                                            style: TextStyle(
+                                              fontSize: 12,
+                                              color: Colors.grey.shade700,
+                                              fontWeight: FontWeight.w500,
+                                            ),
                                           );
                                         },
                                       ),
                                       const SizedBox(height: 6),
-                                      Row(
-                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      Wrap(
+                                        alignment: WrapAlignment.spaceBetween,
+                                        crossAxisAlignment:
+                                            WrapCrossAlignment.center,
+                                        spacing: 6,
+                                        runSpacing: 6,
                                         children: [
                                           Row(
+                                            mainAxisSize: MainAxisSize.min,
                                             children: [
                                               Container(
-                                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 6,
+                                                      vertical: 2,
+                                                    ),
                                                 decoration: BoxDecoration(
-                                                  color: AppColors.primary.withOpacity(0.1),
-                                                  borderRadius: BorderRadius.circular(6),
+                                                  color: AppColors.primary
+                                                      .withOpacity(0.1),
+                                                  borderRadius:
+                                                      BorderRadius.circular(6),
                                                 ),
                                                 child: Text(
                                                   app.bookingType.tr,
@@ -410,7 +464,7 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
                                                   ),
                                                 ),
                                               ),
-                                              const SizedBox(width: 8),
+                                              const SizedBox(width: 6),
                                               Text(
                                                 dateStr,
                                                 style: TextStyle(
@@ -421,30 +475,52 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
                                             ],
                                           ),
                                           Row(
+                                            mainAxisSize: MainAxisSize.min,
                                             children: [
                                               Container(
-                                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 6,
+                                                      vertical: 2,
+                                                    ),
                                                 decoration: BoxDecoration(
-                                                  color: app.paymentStatus.toLowerCase() == 'paid' 
-                                                      ? Colors.green.withOpacity(0.1) 
-                                                      : Colors.orange.withOpacity(0.1),
-                                                  borderRadius: BorderRadius.circular(6),
+                                                  color:
+                                                      app.paymentStatus
+                                                              .toLowerCase() ==
+                                                          'paid'
+                                                      ? Colors.green
+                                                            .withOpacity(0.1)
+                                                      : Colors.orange
+                                                            .withOpacity(0.1),
+                                                  borderRadius:
+                                                      BorderRadius.circular(6),
                                                 ),
                                                 child: Text(
                                                   app.paymentStatus,
                                                   style: TextStyle(
                                                     fontSize: 10,
                                                     fontWeight: FontWeight.bold,
-                                                    color: app.paymentStatus.toLowerCase() == 'paid' ? Colors.green : Colors.orange,
+                                                    color:
+                                                        app.paymentStatus
+                                                                .toLowerCase() ==
+                                                            'paid'
+                                                        ? Colors.green
+                                                        : Colors.orange,
                                                   ),
                                                 ),
                                               ),
                                               const SizedBox(width: 6),
                                               Container(
-                                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                                padding:
+                                                    const EdgeInsets.symmetric(
+                                                      horizontal: 6,
+                                                      vertical: 2,
+                                                    ),
                                                 decoration: BoxDecoration(
-                                                  color: app.statusColor.withOpacity(0.1),
-                                                  borderRadius: BorderRadius.circular(6),
+                                                  color: app.statusColor
+                                                      .withOpacity(0.1),
+                                                  borderRadius:
+                                                      BorderRadius.circular(6),
                                                 ),
                                                 child: Text(
                                                   app.statusKey.tr,
@@ -614,15 +690,6 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
                         });
                       },
                     ),
-                    const SizedBox(height: 15),
-                    TextFormField(
-                      controller: controller.amountController,
-                      decoration: const InputDecoration(
-                        labelText: "Total Bill Amount (₹)",
-                        prefixIcon: Icon(Icons.currency_rupee),
-                      ),
-                      keyboardType: TextInputType.number,
-                    ),
 
                     Obx(() {
                       if (controller.isQuickBill)
@@ -683,50 +750,6 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
                 ),
               ),
 
-              // Required Products Checklist (Stage 1)
-              Obx(() {
-                if (controller.availableProducts.isEmpty) {
-                  return const SizedBox.shrink();
-                }
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 25),
-                    _buildSectionTitle("Required Products / Materials"),
-                    CustomCard(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          const Padding(
-                            padding: EdgeInsets.only(bottom: 10.0),
-                            child: Text(
-                              "Products required for selected services. Auto-selected based on Service Master configuration, but can be manually overridden.",
-                              style: TextStyle(fontSize: 12, color: Colors.grey),
-                            ),
-                          ),
-                          const Divider(),
-                          ...controller.availableProducts.map((prod) {
-                            final id = prod['id']?.toString() ?? '';
-                            final name = prod['name']?.toString() ?? '';
-                            final price = prod['price']?.toString() ?? '';
-                            final isSelected = controller.selectedProductIds.contains(id);
-                            return CheckboxListTile(
-                              title: Text(name, style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14)),
-                              subtitle: Text("Price: ₹$price", style: const TextStyle(fontSize: 12, color: AppColors.accent)),
-                              value: isSelected,
-                              activeColor: AppColors.primary,
-                              onChanged: (val) => controller.toggleProductSelection(id),
-                              controlAffinity: ListTileControlAffinity.leading,
-                              contentPadding: EdgeInsets.zero,
-                            );
-                          }).toList(),
-                        ],
-                      ),
-                    ),
-                  ],
-                );
-              }),
-
               // Remarks & Notes Section (Stage 1 Remarks)
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -741,12 +764,14 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
                           decoration: const InputDecoration(
                             labelText: "Remarks / Special Instructions",
                             prefixIcon: Icon(Icons.note_alt_outlined),
-                            hintText: "Enter any remarks or special requests...",
+                            hintText:
+                                "Enter any remarks or special requests...",
                           ),
                           maxLines: 3,
                         ),
                         Obx(() {
-                          if (controller.isQuickBill) return const SizedBox.shrink();
+                          if (controller.isQuickBill)
+                            return const SizedBox.shrink();
                           return Column(
                             children: [
                               const SizedBox(height: 15),

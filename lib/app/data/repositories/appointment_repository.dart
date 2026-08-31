@@ -1,8 +1,10 @@
 import '../models/appointment_model.dart';
+import '../seed/mock_history_seed.dart';
 
 class AppointmentRepository {
   static List<AppointmentModel> getInitialAppointments() {
     return [
+      ...MockHistorySeed.getTestHistoryAppointments(),
       AppointmentModel(
         id: '1',
         clientName: 'Reena Patel',

@@ -5,7 +5,6 @@ import '../../data/models/service_model.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/custom_widgets/custom_card.dart';
 import 'services_controller.dart';
-import '../product_item/product_item_controller.dart';
 
 class ServicesView extends GetView<ServicesController> {
   const ServicesView({super.key});
@@ -156,25 +155,7 @@ class ServicesView extends GetView<ServicesController> {
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
                   ),
-                  const SizedBox(height: 2),
-                  Builder(
-                    builder: (context) {
-                      final prodController = Get.isRegistered<ProductItemController>()
-                          ? Get.find<ProductItemController>()
-                          : Get.put(ProductItemController());
-                      final productNames = service.requiredProductIds
-                          .map((id) => prodController.items.firstWhereOrNull((item) => item['id'] == id)?['name'] ?? '')
-                          .where((name) => name.isNotEmpty)
-                          .toList();
-                      if (productNames.isEmpty) return const SizedBox.shrink();
-                      return Text(
-                        "Products: ${productNames.join(', ')}",
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(fontSize: 10, color: AppColors.primary, fontWeight: FontWeight.w500),
-                      );
-                    },
-                  ),
+
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
@@ -301,54 +282,7 @@ class ServicesView extends GetView<ServicesController> {
                 onChanged: (val) => category = val!,
                 decoration: InputDecoration(labelText: "profile".tr), // Reusing profile key for category label or add new
               ),
-              const SizedBox(height: 15),
-              const Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  "Required Products",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15, color: AppColors.textPrimaryLight),
-                ),
-              ),
-              const SizedBox(height: 5),
-              Builder(
-                builder: (context) {
-                  final prodController = Get.isRegistered<ProductItemController>()
-                      ? Get.find<ProductItemController>()
-                      : Get.put(ProductItemController());
-                  final prods = prodController.items;
-                  
-                  return Obx(() {
-                    if (prods.isEmpty) {
-                      return const Padding(
-                        padding: EdgeInsets.symmetric(vertical: 8.0),
-                        child: Text("No products available", style: TextStyle(color: Colors.grey, fontSize: 13)),
-                      );
-                    }
-                    return Column(
-                      children: prods.map((prod) {
-                        final id = prod['id']?.toString() ?? '';
-                        final name = prod['name']?.toString() ?? '';
-                        final isChecked = selectedProductIds.contains(id);
-                        return CheckboxListTile(
-                          title: Text(name, style: const TextStyle(fontSize: 14)),
-                          value: isChecked,
-                          dense: true,
-                          activeColor: AppColors.primary,
-                          onChanged: (val) {
-                            if (val == true) {
-                              selectedProductIds.add(id);
-                            } else {
-                              selectedProductIds.remove(id);
-                            }
-                          },
-                          controlAffinity: ListTileControlAffinity.leading,
-                          contentPadding: EdgeInsets.zero,
-                        );
-                      }).toList(),
-                    );
-                  });
-                },
-              ),
+
               const SizedBox(height: 30),
               ElevatedButton(
                 onPressed: () {

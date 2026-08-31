@@ -1,6 +1,8 @@
 import 'package:get/get.dart';
 import '../models/customer_model.dart';
 
+import '../seed/mock_history_seed.dart';
+
 class CustomerService extends GetxService {
   final allCustomers = <CustomerModel>[].obs;
 
@@ -12,6 +14,7 @@ class CustomerService extends GetxService {
 
   void _loadSeedCustomers() {
     allCustomers.assignAll([
+      MockHistorySeed.getTestCustomer(),
       CustomerModel(
         id: 'c1',
         name: 'Reena Patel',
@@ -40,15 +43,18 @@ class CustomerService extends GetxService {
   }
 
   CustomerModel? getCustomerByMobile(String mobile) {
-    final cleanMobile = mobile.trim();
+    final cleanMobile = mobile.replaceAll(RegExp(r'\D'), '');
     if (cleanMobile.length < 10) return null;
     return allCustomers.firstWhereOrNull(
-      (c) => c.mobileNumber.trim() == cleanMobile,
+      (c) => c.mobileNumber.replaceAll(RegExp(r'\D'), '') == cleanMobile,
     );
   }
 
   void registerCustomer(CustomerModel customer) {
-    final index = allCustomers.indexWhere((c) => c.mobileNumber.trim() == customer.mobileNumber.trim());
+    final cleanTarget = customer.mobileNumber.replaceAll(RegExp(r'\D'), '');
+    final index = allCustomers.indexWhere(
+      (c) => c.mobileNumber.replaceAll(RegExp(r'\D'), '') == cleanTarget,
+    );
     if (index != -1) {
       allCustomers[index] = customer;
     } else {

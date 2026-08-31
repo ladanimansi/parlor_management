@@ -13,16 +13,39 @@ class StaffService extends GetxService {
   void loadInitialStaff() {
     allStaff.assignAll([
       StaffModel(
-        id: '1',
-        name: 'Mansi Ladani',
-        mobileNumber: '9898989898',
-        specialties: ['Facial', 'Hair Care'],
+        id: 's1',
+        name: 'Pooja Sharma',
+        mobileNumber: '9898989891',
+        specialties: ['Skin Care', 'Facial', 'General'],
+        status: true,
       ),
       StaffModel(
-        id: '2',
-        name: 'Pooja Patel',
-        mobileNumber: '9797979797',
-        specialties: ['Hair Care', 'Makeup'],
+        id: 's2',
+        name: 'Neha Gupta',
+        mobileNumber: '9898989892',
+        specialties: ['Hair', 'Hair Care', 'Spa'],
+        status: true,
+      ),
+      StaffModel(
+        id: 's3',
+        name: 'Ananya Roy',
+        mobileNumber: '9898989893',
+        specialties: ['Makeup', 'Bridal'],
+        status: true,
+      ),
+      StaffModel(
+        id: 's4',
+        name: 'Kavita Verma',
+        mobileNumber: '9898989894',
+        specialties: ['Nail Care', 'Pedicure', 'Manicure'],
+        status: true,
+      ),
+      StaffModel(
+        id: 's5',
+        name: 'Mansi Ladani',
+        mobileNumber: '9898989895',
+        specialties: ['Master Stylist', 'Facial', 'Hair Care', 'Skin Care'],
+        status: true,
       ),
     ]);
   }

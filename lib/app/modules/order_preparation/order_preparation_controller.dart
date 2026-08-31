@@ -88,36 +88,44 @@ class OrderPreparationController extends GetxController {
   }
 
   void savePreparedItems({bool goToAllocation = false}) {
-    final selectedItems = _itemController.items
+    final selectedItemObjects = _itemController.items
         .where((item) => selectedItemIds.contains(item['id']))
+        .toList();
+
+    final selectedItems = selectedItemObjects
         .map((item) => item['name']?.toString() ?? '')
         .where((name) => name.isNotEmpty)
         .toList();
+
+    double calculatedAmount = 0.0;
+    final List<ServiceItemAllocation> allocations = [];
+
+    for (final itemObj in selectedItemObjects) {
+      final name = itemObj['name']?.toString() ?? '';
+      final price = double.tryParse(itemObj['price']?.toString() ?? '0') ?? 0.0;
+      final itemId = itemObj['id']?.toString() ?? '';
+      calculatedAmount += price;
+      allocations.add(ServiceItemAllocation(
+        serviceId: itemId,
+        serviceName: name,
+        price: price,
+        status: 'Waiting',
+      ));
+    }
 
     if (appointmentId != null) {
       final appointmentService = Get.find<AppointmentService>();
       final index = appointmentService.allAppointments.indexWhere((app) => app.id == appointmentId);
       if (index != -1) {
         final currentApp = appointmentService.allAppointments[index];
-        final updatedApp = AppointmentModel(
-          id: currentApp.id,
-          clientName: currentApp.clientName,
-          mobileNumber: currentApp.mobileNumber,
+        final updatedApp = currentApp.copyWith(
           serviceName: selectedItems.isNotEmpty ? selectedItems.join(', ') : currentApp.serviceName,
-          category: currentApp.category,
-          visitingDateTime: currentApp.visitingDateTime,
-          bookingDateTime: currentApp.bookingDateTime,
-          status: currentApp.status,
-          amount: currentApp.amount,
-          notes: currentApp.notes,
-          referenceBy: currentApp.referenceBy,
-          allocatedStaffId: currentApp.allocatedStaffId,
-          allocatedStaffName: currentApp.allocatedStaffName,
-          bookingType: currentApp.bookingType,
+          amount: calculatedAmount > 0 ? calculatedAmount : currentApp.amount,
+          serviceAllocations: allocations.isNotEmpty ? allocations : currentApp.serviceAllocations,
         );
         appointmentService.updateAppointment(updatedApp);
         Get.back();
-        Get.snackbar("success".tr, "order_preparation_saved".tr);
+        Get.snackbar("success".tr, "Prepared items saved. Total Bill Amount: ₹${updatedApp.amount.toStringAsFixed(0)}");
         if (goToAllocation) {
           Get.toNamed(Routes.ORDER_ALLOCATION, arguments: {
             'appointmentId': appointmentId,
