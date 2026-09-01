@@ -295,13 +295,13 @@ class OrdersView extends GetView<OrdersController> {
             const SizedBox(height: 12),
 
             // Services & Live Execution Progress List
-            if (order.serviceAllocations.isNotEmpty) ...[
+            if (order.effectiveServiceAllocations.isNotEmpty) ...[
               Text(
                 "Services Execution",
                 style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.grey.shade500),
               ),
               const SizedBox(height: 8),
-              ...order.serviceAllocations.map((alloc) {
+              ...order.effectiveServiceAllocations.map((alloc) {
                 final hasStaff = alloc.staffName != null && alloc.staffName!.isNotEmpty;
 
                 Color statusBg;

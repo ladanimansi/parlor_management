@@ -47,6 +47,31 @@ class AppointmentModel {
     this.serviceAllocations = const [],
   });
 
+  List<ServiceItemAllocation> get effectiveServiceAllocations {
+    if (serviceAllocations.isNotEmpty) {
+      return serviceAllocations;
+    }
+
+    final services = serviceName.isNotEmpty
+        ? serviceName.split(',')
+        : (category.isNotEmpty ? category.split(',') : ['General Service']);
+
+    final itemPrice = amount / (services.isEmpty ? 1 : services.length);
+
+    return services.asMap().entries.map((entry) {
+      final idx = entry.key;
+      final sName = entry.value.trim();
+      return ServiceItemAllocation(
+        serviceId: 's_alloc_${id}_$idx',
+        serviceName: sName.isEmpty ? 'Service ${idx + 1}' : sName,
+        price: itemPrice,
+        staffId: allocatedStaffId,
+        staffName: allocatedStaffName,
+        status: status == 'Completed' ? 'Completed' : (allocatedStaffId != null ? 'Running' : 'Waiting'),
+      );
+    }).toList();
+  }
+
   String get statusKey {
     switch (status.toLowerCase()) {
       case 'confirm':

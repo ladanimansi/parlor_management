@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/custom_widgets/custom_card.dart';
 import '../../data/models/appointment_model.dart';
-import '../../data/models/staff_model.dart';
 import '../../routes/app_routes.dart';
 import 'order_allocation_controller.dart';
 
@@ -25,7 +24,7 @@ class OrderAllocationView extends GetView<OrderAllocationController> {
 
   // --- FULL PAGE DEDICATED ALLOCATION SCREEN ---
   Widget _buildFullPageAllocationScreen(BuildContext context, AppointmentModel order) {
-    final allocations = order.serviceAllocations;
+    final allocations = order.effectiveServiceAllocations;
     final totalServices = allocations.length;
     final assignedCount = allocations.where((a) => a.staffId != null && a.staffId!.isNotEmpty).length;
     final isFullyAllocated = totalServices > 0 && assignedCount == totalServices;
@@ -227,121 +226,234 @@ class OrderAllocationView extends GetView<OrderAllocationController> {
                         const Divider(height: 1, thickness: 0.5),
                         const SizedBox(height: 12),
 
-                        Text(
-                          "Select Staff for '${alloc.serviceName}':",
-                          style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.grey.shade700),
+                        // Title & Filter Chips Row for Staff Selection
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Text(
+                              "Staff for '${alloc.serviceName}':",
+                              style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.grey.shade800),
+                            ),
+                            if (matchingStaff.isNotEmpty)
+                              Container(
+                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                                decoration: BoxDecoration(
+                                  color: Colors.amber.withOpacity(0.15),
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Text(
+                                  "${matchingStaff.length} Specialists Available",
+                                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.amber.shade900),
+                                ),
+                              ),
+                          ],
                         ),
                         const SizedBox(height: 10),
 
-                        // Staff Selection Cards List
-                        Column(
-                          children: controller.allStaff.map((staff) {
-                            final isAssigned = alloc.staffId == staff.id;
-                            final isSpecialized = matchingStaff.any((m) => m.id == staff.id);
+                        // Staff Selection Filter Segment Chips
+                        Obx(() {
+                          final currentFilter = controller.getServiceFilter(alloc.serviceId);
+                          final availableCount = controller.allStaff.where((s) => s.isAvailable).length;
 
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 8.0),
-                              child: InkWell(
-                                onTap: () {
-                                  if (isAssigned) {
-                                    controller.allocateStaffToService(order, alloc.serviceId, null);
-                                  } else {
-                                    controller.allocateStaffToService(order, alloc.serviceId, staff);
-                                  }
-                                },
-                                borderRadius: BorderRadius.circular(12),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                                  decoration: BoxDecoration(
-                                    color: isAssigned ? AppColors.primary.withOpacity(0.08) : Colors.white,
-                                    borderRadius: BorderRadius.circular(12),
-                                    border: Border.all(
-                                      color: isAssigned ? AppColors.primary : Colors.grey.shade200,
-                                      width: isAssigned ? 1.8 : 1,
+                          return SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: [
+                                FilterChip(
+                                  label: Text(
+                                    "👥 All (${controller.allStaff.length})",
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                      color: currentFilter == 'all' ? Colors.white : Colors.grey.shade700,
                                     ),
                                   ),
-                                  child: Row(
-                                    children: [
-                                      CircleAvatar(
-                                        radius: 18,
-                                        backgroundColor: isAssigned ? AppColors.primary : Colors.grey.shade200,
-                                        child: Text(
-                                          staff.name.isNotEmpty ? staff.name[0].toUpperCase() : 'S',
-                                          style: TextStyle(
-                                            color: isAssigned ? Colors.white : Colors.black87,
-                                            fontWeight: FontWeight.bold,
+                                  selected: currentFilter == 'all',
+                                  selectedColor: AppColors.primary,
+                                  backgroundColor: Colors.grey.shade100,
+                                  onSelected: (_) => controller.setServiceFilter(alloc.serviceId, 'all'),
+                                  visualDensity: VisualDensity.compact,
+                                ),
+                                const SizedBox(width: 6),
+                                FilterChip(
+                                  label: Text(
+                                    "⭐ ${alloc.serviceName} (${matchingStaff.length})",
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                      color: currentFilter == 'specialists' ? Colors.white : Colors.amber.shade900,
+                                    ),
+                                  ),
+                                  selected: currentFilter == 'specialists',
+                                  selectedColor: Colors.amber.shade700,
+                                  backgroundColor: Colors.amber.withOpacity(0.12),
+                                  onSelected: (_) => controller.setServiceFilter(alloc.serviceId, 'specialists'),
+                                  visualDensity: VisualDensity.compact,
+                                ),
+                                const SizedBox(width: 6),
+                                FilterChip(
+                                  label: Text(
+                                    "🟢 Available ($availableCount)",
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                      color: currentFilter == 'available' ? Colors.white : Colors.green.shade800,
+                                    ),
+                                  ),
+                                  selected: currentFilter == 'available',
+                                  selectedColor: Colors.green.shade700,
+                                  backgroundColor: Colors.green.withOpacity(0.12),
+                                  onSelected: (_) => controller.setServiceFilter(alloc.serviceId, 'available'),
+                                  visualDensity: VisualDensity.compact,
+                                ),
+                              ],
+                            ),
+                          );
+                        }),
+
+                        const SizedBox(height: 12),
+
+                        // Staff Selection Cards List
+                        Obx(() {
+                          final staffList = controller.getRankedStaffForService(alloc.serviceId, alloc.serviceName);
+
+                          if (staffList.isEmpty) {
+                            return Container(
+                              padding: const EdgeInsets.all(16),
+                              alignment: Alignment.center,
+                              child: Text(
+                                "No staff matching selected filter",
+                                style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                              ),
+                            );
+                          }
+
+                          return Column(
+                            children: staffList.map((staff) {
+                              final isAssigned = alloc.staffId == staff.id;
+                              final isSpecialized = matchingStaff.any((m) => m.id == staff.id);
+
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 8.0),
+                                child: InkWell(
+                                  onTap: () {
+                                    if (isAssigned) {
+                                      controller.allocateStaffToService(order, alloc.serviceId, null);
+                                    } else {
+                                      controller.allocateStaffToService(order, alloc.serviceId, staff);
+                                    }
+                                  },
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                                    decoration: BoxDecoration(
+                                      color: isAssigned
+                                          ? AppColors.primary.withOpacity(0.08)
+                                          : (isSpecialized ? Colors.amber.withOpacity(0.03) : Colors.white),
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                        color: isAssigned
+                                            ? AppColors.primary
+                                            : (isSpecialized ? Colors.amber.shade300 : Colors.grey.shade200),
+                                        width: isAssigned ? 1.8 : 1,
+                                      ),
+                                    ),
+                                    child: Row(
+                                      children: [
+                                        CircleAvatar(
+                                          radius: 18,
+                                          backgroundColor: isAssigned
+                                              ? AppColors.primary
+                                              : (isSpecialized ? Colors.amber.shade100 : Colors.grey.shade200),
+                                          child: Text(
+                                            staff.name.isNotEmpty ? staff.name[0].toUpperCase() : 'S',
+                                            style: TextStyle(
+                                              color: isAssigned
+                                                  ? Colors.white
+                                                  : (isSpecialized ? Colors.amber.shade900 : Colors.black87),
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                           ),
                                         ),
-                                      ),
-                                      const SizedBox(width: 12),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Row(
-                                              children: [
-                                                Text(
-                                                  staff.name,
-                                                  style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 14,
-                                                    color: isAssigned ? AppColors.primary : Colors.black87,
+                                        const SizedBox(width: 12),
+                                        Expanded(
+                                          child: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            children: [
+                                              Row(
+                                                children: [
+                                                  Flexible(
+                                                    child: Text(
+                                                      staff.name,
+                                                      style: TextStyle(
+                                                        fontWeight: FontWeight.bold,
+                                                        fontSize: 14,
+                                                        color: isAssigned ? AppColors.primary : Colors.black87,
+                                                      ),
+                                                      overflow: TextOverflow.ellipsis,
+                                                    ),
                                                   ),
-                                                ),
-                                                if (isSpecialized) ...[
+                                                  if (isSpecialized) ...[
+                                                    const SizedBox(width: 6),
+                                                    Container(
+                                                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                                      decoration: BoxDecoration(
+                                                        color: Colors.amber.withOpacity(0.2),
+                                                        borderRadius: BorderRadius.circular(6),
+                                                      ),
+                                                      child: Row(
+                                                        mainAxisSize: MainAxisSize.min,
+                                                        children: const [
+                                                          Icon(Icons.star, size: 10, color: Colors.amber),
+                                                          SizedBox(width: 2),
+                                                          Text(
+                                                            "Specialist",
+                                                            style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.amber),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ],
                                                   const SizedBox(width: 6),
                                                   Container(
                                                     padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                                                     decoration: BoxDecoration(
-                                                      color: Colors.amber.withOpacity(0.15),
+                                                      color: staff.isAvailable
+                                                          ? Colors.green.withOpacity(0.12)
+                                                          : Colors.red.withOpacity(0.12),
                                                       borderRadius: BorderRadius.circular(6),
                                                     ),
-                                                    child: Row(
-                                                      children: const [
-                                                        Icon(Icons.star, size: 10, color: Colors.amber),
-                                                        SizedBox(width: 2),
-                                                        Text("Specialist", style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.amber)),
-                                                      ],
+                                                    child: Text(
+                                                      staff.isAvailable ? "Free" : "Busy",
+                                                      style: TextStyle(
+                                                        fontSize: 10,
+                                                        fontWeight: FontWeight.bold,
+                                                        color: staff.isAvailable ? Colors.green.shade800 : Colors.red.shade800,
+                                                      ),
                                                     ),
                                                   ),
                                                 ],
-                                                const SizedBox(width: 6),
-                                                Container(
-                                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                                  decoration: BoxDecoration(
-                                                    color: staff.isAvailable ? Colors.green.withOpacity(0.12) : Colors.red.withOpacity(0.12),
-                                                    borderRadius: BorderRadius.circular(6),
-                                                  ),
-                                                  child: Text(
-                                                    staff.isAvailable ? "Free" : "Busy",
-                                                    style: TextStyle(
-                                                      fontSize: 10,
-                                                      fontWeight: FontWeight.bold,
-                                                      color: staff.isAvailable ? Colors.green.shade800 : Colors.red.shade800,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            const SizedBox(height: 2),
-                                            Text(
-                                              staff.specialties.join(', '),
-                                              style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
-                                            ),
-                                          ],
+                                              ),
+                                              const SizedBox(height: 2),
+                                              Text(
+                                                staff.specialties.join(', '),
+                                                style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                                              ),
+                                            ],
+                                          ),
                                         ),
-                                      ),
-                                      Icon(
-                                        isAssigned ? Icons.check_circle : Icons.radio_button_off,
-                                        color: isAssigned ? AppColors.primary : Colors.grey.shade400,
-                                      ),
-                                    ],
+                                        Icon(
+                                          isAssigned ? Icons.check_circle : Icons.radio_button_off,
+                                          color: isAssigned ? AppColors.primary : Colors.grey.shade400,
+                                        ),
+                                      ],
+                                    ),
                                   ),
                                 ),
-                              ),
-                            );
-                          }).toList(),
-                        ),
+                              );
+                            }).toList(),
+                          );
+                        }),
                       ],
                     ),
                   ),
@@ -492,7 +604,7 @@ class OrderAllocationView extends GetView<OrderAllocationController> {
                 itemCount: orders.length,
                 itemBuilder: (context, index) {
                   final order = orders[index];
-                  final allocs = order.serviceAllocations;
+                  final allocs = order.effectiveServiceAllocations;
                   final assignedCount = allocs.where((a) => a.staffId != null && a.staffId!.isNotEmpty).length;
                   final isFullyAllocated = allocs.isNotEmpty && assignedCount == allocs.length;
 

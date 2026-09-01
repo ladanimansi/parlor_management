@@ -381,18 +381,17 @@ class BookAppointmentController extends GetxController {
     // Build service-wise allocations
     final List<ServiceItemAllocation> allocations = [];
     final servicesController = Get.find<ServicesController>();
-    for (final sName in selectedServices) {
+    for (int i = 0; i < selectedServices.length; i++) {
+      final sName = selectedServices[i];
       final serviceModel = servicesController.allServices.firstWhereOrNull(
-        (s) => s.name.toLowerCase() == sName.toLowerCase()
+        (s) => s.name.toLowerCase() == sName.toLowerCase(),
       );
-      if (serviceModel != null) {
-        allocations.add(ServiceItemAllocation(
-          serviceId: serviceModel.id,
-          serviceName: serviceModel.name,
-          price: serviceModel.price,
-          status: 'Waiting', // Default status waiting for staff accept
-        ));
-      }
+      allocations.add(ServiceItemAllocation(
+        serviceId: serviceModel?.id ?? 's_alloc_${DateTime.now().millisecondsSinceEpoch}_$i',
+        serviceName: serviceModel?.name ?? sName,
+        price: serviceModel?.price ?? ((double.tryParse(amountController.text) ?? 0.0) / (selectedServices.isEmpty ? 1 : selectedServices.length)),
+        status: 'Waiting',
+      ));
     }
 
     final prodNames = selectedProductIds.isNotEmpty
