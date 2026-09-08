@@ -751,73 +751,72 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
               ),
 
               // Remarks & Notes Section (Stage 1 Remarks)
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 25),
-                  _buildSectionTitle("additional_info".tr),
-                  CustomCard(
-                    child: Column(
-                      children: [
-                        TextFormField(
-                          controller: controller.notesController,
-                          decoration: const InputDecoration(
-                            labelText: "Remarks / Special Instructions",
-                            prefixIcon: Icon(Icons.note_alt_outlined),
-                            hintText:
-                                "Enter any remarks or special requests...",
-                          ),
-                          maxLines: 3,
-                        ),
-                        Obx(() {
-                          if (controller.isQuickBill)
-                            return const SizedBox.shrink();
-                          return Column(
-                            children: [
-                              const SizedBox(height: 15),
-                              TextFormField(
-                                controller: controller.referenceByController,
-                                decoration: InputDecoration(
-                                  labelText: "reference_by".tr,
-                                  prefixIcon: const Icon(Icons.group_outlined),
-                                  hintText: "e.g., Instagram, Friend, Google",
-                                ),
-                              ),
-                              const SizedBox(height: 15),
-                              DropdownButtonFormField<String>(
-                                value: controller.selectedStatus.value,
-                                items: controller.statuses.map((s) {
-                                  final dummyApp = AppointmentModel(
-                                    id: '',
-                                    clientName: '',
-                                    mobileNumber: '',
-                                    serviceName: '',
-                                    category: '',
-                                    visitingDateTime: DateTime.now(),
-                                    bookingDateTime: DateTime.now(),
-                                    status: s,
-                                    amount: 0,
-                                  );
-                                  return DropdownMenuItem(
-                                    value: s,
-                                    child: Text(dummyApp.statusKey.tr),
-                                  );
-                                }).toList(),
-                                onChanged: (v) => controller.updateStatus(v!),
-                                decoration: InputDecoration(
-                                  labelText: "status".tr,
-                                  prefixIcon: const Icon(Icons.info_outline),
-                                ),
-                              ),
-                            ],
-                          );
-                        }),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-
+              // Column(
+              //   crossAxisAlignment: CrossAxisAlignment.start,
+              //   children: [
+              //     const SizedBox(height: 25),
+              //     _buildSectionTitle("additional_info".tr),
+              //     CustomCard(
+              //       child: Column(
+              //         children: [
+              //           TextFormField(
+              //             controller: controller.notesController,
+              //             decoration: const InputDecoration(
+              //               labelText: "Remarks / Special Instructions",
+              //               prefixIcon: Icon(Icons.note_alt_outlined),
+              //               hintText:
+              //                   "Enter any remarks or special requests...",
+              //             ),
+              //             maxLines: 3,
+              //           ),
+              //           Obx(() {
+              //             if (controller.isQuickBill)
+              //               return const SizedBox.shrink();
+              //             return Column(
+              //               children: [
+              //                 const SizedBox(height: 15),
+              //                 TextFormField(
+              //                   controller: controller.referenceByController,
+              //                   decoration: InputDecoration(
+              //                     labelText: "reference_by".tr,
+              //                     prefixIcon: const Icon(Icons.group_outlined),
+              //                     hintText: "e.g., Instagram, Friend, Google",
+              //                   ),
+              //                 ),
+              //                 const SizedBox(height: 15),
+              //                 DropdownButtonFormField<String>(
+              //                   value: controller.selectedStatus.value,
+              //                   items: controller.statuses.map((s) {
+              //                     final dummyApp = AppointmentModel(
+              //                       id: '',
+              //                       clientName: '',
+              //                       mobileNumber: '',
+              //                       serviceName: '',
+              //                       category: '',
+              //                       visitingDateTime: DateTime.now(),
+              //                       bookingDateTime: DateTime.now(),
+              //                       status: s,
+              //                       amount: 0,
+              //                     );
+              //                     return DropdownMenuItem(
+              //                       value: s,
+              //                       child: Text(dummyApp.statusKey.tr),
+              //                     );
+              //                   }).toList(),
+              //                   onChanged: (v) => controller.updateStatus(v!),
+              //                   decoration: InputDecoration(
+              //                     labelText: "status".tr,
+              //                     prefixIcon: const Icon(Icons.info_outline),
+              //                   ),
+              //                 ),
+              //               ],
+              //             );
+              //           }),
+              //         ],
+              //       ),
+              //     ),
+              //   ],
+              // ),
               const SizedBox(height: 40),
               SizedBox(
                 width: double.infinity,

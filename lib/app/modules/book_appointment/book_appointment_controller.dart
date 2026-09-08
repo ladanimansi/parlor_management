@@ -198,12 +198,14 @@ class BookAppointmentController extends GetxController {
         clientOtherInfo.value = customer.otherInfo ?? '';
         _lastAutoFilledMobile = cleanMobile;
 
-        Get.snackbar(
-          "Customer Found",
-          "Customer profile auto-filled for '${customer.name}'",
-          duration: const Duration(seconds: 3),
-          snackPosition: SnackPosition.TOP,
-        );
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Get.snackbar(
+            "Customer Found",
+            "Customer profile auto-filled for '${customer.name}'",
+            duration: const Duration(seconds: 3),
+            snackPosition: SnackPosition.TOP,
+          );
+        });
       } else if (matches.isNotEmpty) {
         isNewCustomer.value = false;
         final latest = matches.first;
@@ -215,12 +217,14 @@ class BookAppointmentController extends GetxController {
         clientOtherInfo.value = latest.clientOtherInfo ?? '';
         _lastAutoFilledMobile = cleanMobile;
 
-        Get.snackbar(
-          "Customer Found",
-          "Customer details auto-filled for '${latest.clientName}' from previous visits!",
-          duration: const Duration(seconds: 3),
-          snackPosition: SnackPosition.TOP,
-        );
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Get.snackbar(
+            "Customer Found",
+            "Customer details auto-filled for '${latest.clientName}' from previous visits!",
+            duration: const Duration(seconds: 3),
+            snackPosition: SnackPosition.TOP,
+          );
+        });
       } else {
         isNewCustomer.value = true;
       }
