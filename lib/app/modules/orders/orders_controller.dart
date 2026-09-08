@@ -6,16 +6,58 @@ import '../../data/services/appointment_service.dart';
 class OrdersController extends GetxController {
   final AppointmentService _appointmentService = Get.find<AppointmentService>();
   final searchQuery = ''.obs;
-  final activeTab = 'All'.obs; // 'All', 'InProgress', 'PendingAllocation', 'Completed'
+  final isSearchOpen = false.obs;
+  final activeTab = 'All'.obs; // 'All', 'InProgress', 'PendingAllocation', 'Completed', 'Waiting', 'Confirm', 'Cancelled'
+  final selectedServiceFilter = 'All'.obs;
+
+  void toggleSearch() {
+    isSearchOpen.value = !isSearchOpen.value;
+    if (!isSearchOpen.value) {
+      searchQuery.value = '';
+    }
+  }
+
+  bool get hasActiveFilters =>
+      activeTab.value != 'All' ||
+      selectedServiceFilter.value != 'All' ||
+      searchQuery.value.isNotEmpty;
+
+  int get activeFilterCount {
+    int count = 0;
+    if (activeTab.value != 'All') count++;
+    if (selectedServiceFilter.value != 'All') count++;
+    if (searchQuery.value.isNotEmpty) count++;
+    return count;
+  }
+
+  List<String> get availableServices {
+    final set = <String>{'All'};
+    for (final order in allOrders) {
+      if (order.serviceName.isNotEmpty) {
+        final parts = order.serviceName.split(',').map((s) => s.trim()).where((s) => s.isNotEmpty);
+        set.addAll(parts);
+      }
+    }
+    return set.toList();
+  }
+
+  void resetAllFilters() {
+    activeTab.value = 'All';
+    selectedServiceFilter.value = 'All';
+    searchQuery.value = '';
+  }
 
   List<AppointmentModel> get allOrders => _appointmentService.allAppointments;
 
   List<AppointmentModel> get filteredOrders {
     final query = searchQuery.value.toLowerCase().trim();
     final tab = activeTab.value;
+    final serviceFilter = selectedServiceFilter.value;
+
     var list = List<AppointmentModel>.from(_appointmentService.allAppointments);
     list.sort((a, b) => b.bookingDateTime.compareTo(a.bookingDateTime));
 
+    // 1. Status / Tab Filter
     if (tab == 'InProgress') {
       list = list.where((o) => o.status == 'InProgress' || o.status == 'Confirm' || o.serviceAllocations.any((sa) => sa.status == 'Running')).toList();
     } else if (tab == 'PendingAllocation') {
@@ -27,19 +69,31 @@ class OrdersController extends GetxController {
       }).toList();
     } else if (tab == 'Completed') {
       list = list.where((o) => o.status == 'Completed').toList();
+    } else if (tab == 'Waiting') {
+      list = list.where((o) => o.status == 'Waiting').toList();
+    } else if (tab == 'Cancelled') {
+      list = list.where((o) => o.status == 'Cancelled').toList();
+    } else if (tab == 'Confirm') {
+      list = list.where((o) => o.status == 'Confirm').toList();
     }
 
-    if (query.isEmpty) {
-      return list;
+    // 2. Service Filter
+    if (serviceFilter != 'All') {
+      list = list.where((o) => o.serviceName.toLowerCase().contains(serviceFilter.toLowerCase())).toList();
     }
-    
-    return list.where((app) {
-      final matchesClient = app.clientName.toLowerCase().contains(query);
-      final matchesMobile = app.mobileNumber.contains(query);
-      final matchesCategory = app.category.toLowerCase().contains(query);
-      final matchesServices = app.serviceName.toLowerCase().contains(query);
-      return matchesClient || matchesMobile || matchesCategory || matchesServices;
-    }).toList();
+
+    // 3. Search Query
+    if (query.isNotEmpty) {
+      list = list.where((app) {
+        final matchesClient = app.clientName.toLowerCase().contains(query);
+        final matchesMobile = app.mobileNumber.contains(query);
+        final matchesCategory = app.category.toLowerCase().contains(query);
+        final matchesServices = app.serviceName.toLowerCase().contains(query);
+        return matchesClient || matchesMobile || matchesCategory || matchesServices;
+      }).toList();
+    }
+
+    return list;
   }
 
   void updateAppointment(AppointmentModel app) {
@@ -60,9 +114,13 @@ class OrdersController extends GetxController {
       return sa;
     }).toList();
 
-    // If order status was Inquiry or Confirm, let's move to InProgress
+    final alloc = order.effectiveServiceAllocations.firstWhereOrNull((sa) => sa.serviceId == serviceId);
+    final hasStaff = (alloc?.staffId != null && alloc!.staffId!.isNotEmpty) ||
+        (order.allocatedStaffId != null && order.allocatedStaffId!.isNotEmpty);
+
+    // Order status can move to InProgress ONLY if staff is allocated
     String overallStatus = order.status;
-    if (overallStatus == 'Inquiry' || overallStatus == 'Confirm') {
+    if (hasStaff && (overallStatus == 'Inquiry' || overallStatus == 'Confirm' || overallStatus == 'Waiting')) {
       overallStatus = 'InProgress';
     }
 
@@ -75,6 +133,19 @@ class OrdersController extends GetxController {
   }
 
   void startService(AppointmentModel order, String serviceId) {
+    final alloc = order.effectiveServiceAllocations.firstWhereOrNull((sa) => sa.serviceId == serviceId);
+    final hasStaff = (alloc?.staffId != null && alloc!.staffId!.isNotEmpty) ||
+        (order.allocatedStaffId != null && order.allocatedStaffId!.isNotEmpty);
+
+    if (!hasStaff) {
+      Get.snackbar(
+        "Staff Allocation Required",
+        "Cannot start service! Please allocate staff first.",
+        snackPosition: SnackPosition.BOTTOM,
+      );
+      return;
+    }
+
     String serviceName = '';
     String staffName = '';
     

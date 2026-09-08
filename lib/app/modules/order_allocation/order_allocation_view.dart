@@ -509,9 +509,26 @@ class OrderAllocationView extends GetView<OrderAllocationController> {
     return Scaffold(
       backgroundColor: AppColors.backgroundLight,
       appBar: AppBar(
-        title: Text(
-          "Staff Allocation Directory",
-          style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimaryLight),
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              "Staff Allocation Directory",
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 18,
+                color: AppColors.textPrimaryLight,
+              ),
+            ),
+            Text(
+              "Assign & manage staff members for customer orders",
+              style: TextStyle(
+                fontSize: 11,
+                color: Colors.grey.shade600,
+                fontWeight: FontWeight.normal,
+              ),
+            ),
+          ],
         ),
         backgroundColor: Colors.white,
         elevation: 0.5,
@@ -520,56 +537,130 @@ class OrderAllocationView extends GetView<OrderAllocationController> {
       body: Column(
         children: [
           // Search & Filter Header
-          Padding(
-            padding: const EdgeInsets.all(16.0),
+          Container(
+            color: Colors.white,
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
             child: Column(
               children: [
+                // Modern Search Field
                 Container(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.backgroundLight,
                     borderRadius: BorderRadius.circular(15),
+                    border: Border.all(color: Colors.grey.shade200),
                     boxShadow: [
                       BoxShadow(
-                        color: Colors.black.withOpacity(0.04),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
+                        color: Colors.black.withValues(alpha: 0.02),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
                       ),
                     ],
                   ),
-                  child: TextField(
-                    onChanged: (value) => controller.searchQuery.value = value,
-                    decoration: InputDecoration(
-                      hintText: "Search client, mobile, service or staff...",
-                      prefixIcon: const Icon(Icons.search, color: AppColors.primary),
-                      contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(15),
-                        borderSide: BorderSide.none,
+                  child: Obx(
+                    () => TextField(
+                      onChanged: (value) => controller.searchQuery.value = value,
+                      controller: TextEditingController.fromValue(
+                        TextEditingValue(
+                          text: controller.searchQuery.value,
+                          selection: TextSelection.collapsed(
+                            offset: controller.searchQuery.value.length,
+                          ),
+                        ),
+                      ),
+                      decoration: InputDecoration(
+                        hintText: "Search client name, mobile, service or staff...",
+                        hintStyle: TextStyle(fontSize: 13, color: Colors.grey.shade500),
+                        prefixIcon: const Icon(Icons.search, color: AppColors.primary, size: 20),
+                        suffixIcon: controller.searchQuery.value.isNotEmpty
+                            ? IconButton(
+                                icon: const Icon(Icons.close, size: 18, color: Colors.grey),
+                                onPressed: () => controller.searchQuery.value = '',
+                              )
+                            : null,
+                        contentPadding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+                        border: InputBorder.none,
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 10),
-                // Filter Chips Row
+                const SizedBox(height: 12),
+                // Filter Chips Row with Counters
                 Obx(() {
                   final active = controller.activeFilter.value;
-                  final filters = ['All', 'Pending', 'Allocated'];
+                  final allOrders = controller.allOrders;
+                  final pendingCount = allOrders.where((o) {
+                    final allocs = o.effectiveServiceAllocations;
+                    return allocs.any((sa) => sa.staffId == null || sa.staffId!.isEmpty);
+                  }).length;
+                  final allocatedCount = allOrders.length - pendingCount;
+
+                  final filters = [
+                    {'name': 'All', 'count': allOrders.length},
+                    {'name': 'Pending', 'count': pendingCount},
+                    {'name': 'Allocated', 'count': allocatedCount},
+                  ];
 
                   return Row(
                     children: filters.map((f) {
-                      final isSelected = active == f;
+                      final name = f['name'] as String;
+                      final count = f['count'] as int;
+                      final isSelected = active == name;
                       return Padding(
                         padding: const EdgeInsets.only(right: 8.0),
-                        child: ChoiceChip(
-                          label: Text(f, style: TextStyle(fontWeight: FontWeight.bold, color: isSelected ? Colors.white : Colors.grey.shade700)),
-                          selected: isSelected,
-                          selectedColor: AppColors.primary,
-                          backgroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(10),
-                            side: BorderSide(color: isSelected ? AppColors.primary : Colors.grey.shade300),
+                        child: InkWell(
+                          onTap: () => controller.activeFilter.value = name,
+                          borderRadius: BorderRadius.circular(20),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                            decoration: BoxDecoration(
+                              color: isSelected ? AppColors.primary : Colors.white,
+                              borderRadius: BorderRadius.circular(20),
+                              border: Border.all(
+                                color: isSelected ? AppColors.primary : Colors.grey.shade300,
+                              ),
+                              boxShadow: isSelected
+                                  ? [
+                                      BoxShadow(
+                                        color: AppColors.primary.withValues(alpha: 0.25),
+                                        blurRadius: 6,
+                                        offset: const Offset(0, 3),
+                                      ),
+                                    ]
+                                  : null,
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  name,
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 13,
+                                    color: isSelected ? Colors.white : Colors.grey.shade700,
+                                  ),
+                                ),
+                                const SizedBox(width: 6),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: isSelected
+                                        ? Colors.white.withValues(alpha: 0.25)
+                                        : Colors.grey.shade200,
+                                    borderRadius: BorderRadius.circular(10),
+                                  ),
+                                  child: Text(
+                                    '$count',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.bold,
+                                      color: isSelected ? Colors.white : Colors.grey.shade800,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                          onSelected: (_) => controller.activeFilter.value = f,
                         ),
                       );
                     }).toList(),
@@ -579,22 +670,44 @@ class OrderAllocationView extends GetView<OrderAllocationController> {
             ),
           ),
 
-          // Orders List
+          const SizedBox(height: 8),
+
+          // Professional Orders List
           Expanded(
             child: Obx(() {
               final orders = controller.filteredOrders;
               if (orders.isEmpty) {
                 return Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Icon(Icons.people_outline, size: 64, color: Colors.grey.shade300),
-                      const SizedBox(height: 16),
-                      Text(
-                        "No orders found",
-                        style: TextStyle(fontSize: 16, color: Colors.grey.shade600, fontWeight: FontWeight.w500),
-                      ),
-                    ],
+                  child: Padding(
+                    padding: const EdgeInsets.all(30.0),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: 0.08),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.person_search_outlined, size: 48, color: AppColors.primary),
+                        ),
+                        const SizedBox(height: 16),
+                        const Text(
+                          "No orders found",
+                          style: TextStyle(
+                            fontSize: 17,
+                            color: AppColors.textPrimaryLight,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          "Try searching with a different client name, mobile number, or change your filter selection.",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(fontSize: 13, color: Colors.grey.shade600),
+                        ),
+                      ],
+                    ),
                   ),
                 );
               }
@@ -604,77 +717,7 @@ class OrderAllocationView extends GetView<OrderAllocationController> {
                 itemCount: orders.length,
                 itemBuilder: (context, index) {
                   final order = orders[index];
-                  final allocs = order.effectiveServiceAllocations;
-                  final assignedCount = allocs.where((a) => a.staffId != null && a.staffId!.isNotEmpty).length;
-                  final isFullyAllocated = allocs.isNotEmpty && assignedCount == allocs.length;
-
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 12.0),
-                    child: CustomCard(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Expanded(
-                                child: Text(
-                                  order.clientName,
-                                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                                decoration: BoxDecoration(
-                                  color: isFullyAllocated ? Colors.green.withOpacity(0.1) : Colors.orange.withOpacity(0.1),
-                                  borderRadius: BorderRadius.circular(6),
-                                ),
-                                child: Text(
-                                  isFullyAllocated ? "Allocated ($assignedCount/${allocs.length})" : "Pending ($assignedCount/${allocs.length})",
-                                  style: TextStyle(
-                                    fontSize: 11,
-                                    fontWeight: FontWeight.bold,
-                                    color: isFullyAllocated ? Colors.green.shade800 : Colors.orange.shade800,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 6),
-                          Text(
-                            order.serviceName.isEmpty ? "Services Pending" : order.serviceName,
-                            style: TextStyle(fontSize: 13, color: Colors.grey.shade700, fontWeight: FontWeight.w500),
-                          ),
-                          const SizedBox(height: 10),
-                          const Divider(height: 1, thickness: 0.5),
-                          const SizedBox(height: 10),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Text(
-                                DateFormat('dd MMM yyyy, hh:mm a').format(order.bookingDateTime),
-                                style: TextStyle(fontSize: 12, color: Colors.grey.shade500),
-                              ),
-                              ElevatedButton.icon(
-                                onPressed: () => controller.selectOrderForAllocation(order),
-                                icon: const Icon(Icons.person_add_alt_1_outlined, size: 14, color: Colors.white),
-                                label: const Text("Manage Staff", style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white)),
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: AppColors.primary,
-                                  elevation: 0,
-                                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(10),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  );
+                  return _buildProfessionalOrderCard(context, order);
                 },
               );
             }),
@@ -683,4 +726,318 @@ class OrderAllocationView extends GetView<OrderAllocationController> {
       ),
     );
   }
+
+  Widget _buildProfessionalOrderCard(BuildContext context, AppointmentModel order) {
+    final allocs = order.effectiveServiceAllocations;
+    final assignedCount = allocs.where((a) => a.staffId != null && a.staffId!.isNotEmpty).length;
+    final totalCount = allocs.length;
+    final isFullyAllocated = allocs.isNotEmpty && assignedCount == totalCount;
+
+    final initial = order.clientName.trim().isNotEmpty
+        ? order.clientName.trim()[0].toUpperCase()
+        : '?';
+
+    return Container(
+      margin: const EdgeInsets.only(bottom: 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: isFullyAllocated
+              ? Colors.green.withValues(alpha: 0.25)
+              : AppColors.primary.withValues(alpha: 0.15),
+          width: 1,
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: InkWell(
+        onTap: () => controller.selectOrderForAllocation(order),
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Row 1: Client Avatar + Name & Mobile + Allocation Status Pill
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // Client Avatar Circle
+                  Container(
+                    width: 46,
+                    height: 46,
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          AppColors.primary,
+                          AppColors.primary.withValues(alpha: 0.8),
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                      shape: BoxShape.circle,
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withValues(alpha: 0.25),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Text(
+                        initial,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          fontSize: 19,
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  // Client Name & Mobile Number Details
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          order.clientName.trim().isEmpty ? "Walk-in Client" : order.clientName,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimaryLight,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 3),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                          decoration: BoxDecoration(
+                            color: AppColors.backgroundLight,
+                            borderRadius: BorderRadius.circular(6),
+                            border: Border.all(color: Colors.grey.shade200),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(
+                                Icons.phone_android_outlined,
+                                size: 12,
+                                color: AppColors.primary,
+                              ),
+                              const SizedBox(width: 4),
+                              Flexible(
+                                child: Text(
+                                  order.mobileNumber.isEmpty ? "No Mobile Number" : order.mobileNumber,
+                                  style: const TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.secondary,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  // Allocation Status Tag
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                    decoration: BoxDecoration(
+                      color: isFullyAllocated
+                          ? Colors.green.withValues(alpha: 0.1)
+                          : Colors.orange.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: isFullyAllocated ? Colors.green.shade400 : Colors.orange.shade400,
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          isFullyAllocated ? Icons.check_circle_outline : Icons.pending_actions_outlined,
+                          size: 13,
+                          color: isFullyAllocated ? Colors.green.shade700 : Colors.orange.shade800,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          isFullyAllocated
+                              ? "Allocated ($assignedCount/$totalCount)"
+                              : "Pending ($assignedCount/$totalCount)",
+                          style: TextStyle(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: isFullyAllocated ? Colors.green.shade800 : Colors.orange.shade900,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 12),
+              const Divider(height: 1, thickness: 0.6),
+              const SizedBox(height: 12),
+
+              // Row 2: Booking Type & Date Time
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  // Booking Type Badge
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: AppColors.secondary.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Text(
+                      order.bookingType.tr,
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.secondary,
+                      ),
+                    ),
+                  ),
+                  // Date & Time Stamp
+                  Row(
+                    children: [
+                      Icon(Icons.calendar_today_outlined, size: 12, color: Colors.grey.shade600),
+                      const SizedBox(width: 4),
+                      Text(
+                        DateFormat('dd MMM yyyy, hh:mm a').format(order.bookingDateTime),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey.shade600,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 10),
+
+              // Services & Staff Allocations Detail Box
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: AppColors.backgroundLight,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: Colors.grey.shade200),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        const Icon(Icons.design_services_outlined, size: 14, color: AppColors.primary),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            "Services: ${order.serviceName.isEmpty ? "General Service" : order.serviceName}",
+                            style: const TextStyle(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimaryLight,
+                            ),
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (allocs.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Wrap(
+                        spacing: 6,
+                        runSpacing: 6,
+                        children: allocs.map((sa) {
+                          final hasStaff = sa.staffName != null && sa.staffName!.isNotEmpty;
+                          return Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: hasStaff
+                                  ? Colors.green.withValues(alpha: 0.1)
+                                  : Colors.amber.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: hasStaff ? Colors.green.shade300 : Colors.amber.shade400,
+                                width: 0.8,
+                              ),
+                            ),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  hasStaff ? Icons.how_to_reg_outlined : Icons.person_outline,
+                                  size: 12,
+                                  color: hasStaff ? Colors.green.shade700 : Colors.amber.shade900,
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  "${sa.serviceName}: ${hasStaff ? sa.staffName : 'Unassigned'}",
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: hasStaff ? Colors.green.shade900 : Colors.amber.shade900,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              // Action Button to Manage Allocation
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () => controller.selectOrderForAllocation(order),
+                  icon: const Icon(Icons.person_add_alt_1_outlined, size: 16, color: Colors.white),
+                  label: const Text(
+                    "Manage Staff Allocation",
+                    style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: Colors.white),
+                  ),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    elevation: 1,
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }
+

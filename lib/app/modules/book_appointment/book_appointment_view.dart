@@ -750,7 +750,57 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
                 ),
               ),
 
-              // Remarks & Notes Section (Stage 1 Remarks)
+              const SizedBox(height: 25),
+              _buildSectionTitle("status".tr),
+              CustomCard(
+                child: Obx(
+                  () => DropdownButtonFormField<String>(
+                    value: controller.statuses.contains(controller.selectedStatus.value)
+                        ? controller.selectedStatus.value
+                        : 'Waiting',
+                    items: controller.statuses.map((s) {
+                      final dummyApp = AppointmentModel(
+                        id: '',
+                        clientName: '',
+                        mobileNumber: '',
+                        serviceName: '',
+                        category: '',
+                        visitingDateTime: DateTime.now(),
+                        bookingDateTime: DateTime.now(),
+                        status: s,
+                        amount: 0,
+                      );
+                      return DropdownMenuItem(
+                        value: s,
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 10,
+                              height: 10,
+                              decoration: BoxDecoration(
+                                color: dummyApp.statusColor,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(dummyApp.statusKey.tr),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                    onChanged: (v) {
+                      if (v != null) controller.updateStatus(v);
+                    },
+                    decoration: InputDecoration(
+                      labelText: "status".tr,
+                      prefixIcon: const Icon(Icons.info_outline, color: AppColors.primary),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
               // Column(
               //   crossAxisAlignment: CrossAxisAlignment.start,
               //   children: [

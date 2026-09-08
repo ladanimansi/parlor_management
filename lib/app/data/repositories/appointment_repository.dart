@@ -39,6 +39,8 @@ class AppointmentRepository {
         status: 'InProgress',
         amount: 2500,
         referenceBy: 'Instagram',
+        allocatedStaffId: 'st_1',
+        allocatedStaffName: 'Anjali Sharma',
       ),
     ];
   }

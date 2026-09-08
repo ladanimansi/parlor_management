@@ -125,10 +125,10 @@ class BookAppointmentController extends GetxController {
   final bookingTime = TimeOfDay.now().obs;
 
   final selectedCategories = <String>[].obs;
-  final selectedStatus = 'Inquiry'.obs;
+  final selectedStatus = 'Waiting'.obs;
 
   final categories = ['General', 'Hair', 'Skin Care', 'Makeup', 'Nail Care', 'Spa'];
-  final statuses = ['Inquiry', 'Confirm', 'InProgress', 'Completed', 'Cancelled'];
+  final statuses = ['Waiting', 'InProgress', 'Confirm', 'Inquiry', 'Completed', 'Cancelled'];
 
   @override
   void onInit() {
@@ -248,6 +248,7 @@ class BookAppointmentController extends GetxController {
     }
     selectedCategories.assignAll(['General']);
     selectedBookingType.value = 'Walk in orders';
+    selectedStatus.value = 'Waiting';
   }
 
   void _prefillData(AppointmentModel appointment) {
@@ -315,7 +316,31 @@ class BookAppointmentController extends GetxController {
     }
   }
   
-  void updateStatus(String status) => selectedStatus.value = status;
+  bool isStaffAllocated() {
+    final app = selectedAppointment.value;
+    if (app == null) return false;
+    final bool hasOrderStaff = app.allocatedStaffId != null && app.allocatedStaffId!.isNotEmpty;
+    final bool hasServiceStaff = app.serviceAllocations.isNotEmpty &&
+        app.serviceAllocations.any((sa) => sa.staffId != null && sa.staffId!.isNotEmpty);
+    return hasOrderStaff || hasServiceStaff;
+  }
+  
+  void updateStatus(String status) {
+    if (status == 'InProgress' && !isStaffAllocated()) {
+      Get.snackbar(
+        "Staff Allocation Required",
+        "Staff is not allocated to this order yet. Order status cannot be changed to 'In Progress' until staff is allocated.",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.orange.shade100,
+        colorText: Colors.orange.shade900,
+        margin: const EdgeInsets.all(12),
+        duration: const Duration(seconds: 4),
+      );
+      selectedStatus.value = 'Waiting';
+      return;
+    }
+    selectedStatus.value = status;
+  }
 
   void selectBookingType(String type) {
     if (!isEdit.value) {
@@ -326,6 +351,16 @@ class BookAppointmentController extends GetxController {
   void saveAppointment({bool goToPreparation = false, bool goToAllocation = false}) {
     if (!formKey.currentState!.validate()) return;
 
+    if (selectedStatus.value == 'InProgress' && !isStaffAllocated()) {
+      selectedStatus.value = 'Waiting';
+      Get.snackbar(
+        "Status Defaulted to Waiting",
+        "Order status defaulted to 'Waiting' because staff has not been allocated yet.",
+        snackPosition: SnackPosition.BOTTOM,
+        duration: const Duration(seconds: 3),
+      );
+    }
+
     DateTime finalVisitingDateTime;
     DateTime finalBookingDateTime;
     String status;
@@ -335,7 +370,7 @@ class BookAppointmentController extends GetxController {
     if (isQuickBill) {
       finalVisitingDateTime = DateTime.now();
       finalBookingDateTime = DateTime.now();
-      status = 'InProgress'; // Starts as InProgress for staff allocation and service execution
+      status = selectedStatus.value;
       notes = notesController.text.trim().isEmpty ? null : notesController.text.trim();
       referenceBy = null;
     } else {

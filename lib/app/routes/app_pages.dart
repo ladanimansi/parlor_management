@@ -19,6 +19,7 @@ import '../modules/order_preparation/order_preparation_binding.dart';
 import '../modules/order_preparation/order_preparation_view.dart';
 import '../modules/orders/orders_binding.dart';
 import '../modules/orders/orders_view.dart';
+import '../modules/orders/order_detail_view.dart';
 import '../modules/staff/staff_binding.dart';
 import '../modules/staff/staff_view.dart';
 import '../modules/staff/add_staff_binding.dart';
@@ -101,6 +102,11 @@ class AppPages {
       page: () => const OrderAllocationView(),
       binding: OrderAllocationBinding(),
     ),
+    GetPage(
+      name: _Paths.ORDER_DETAIL,
+      page: () => const OrderDetailView(),
+      binding: OrdersBinding(),
+    ),
   ];
 }
 
@@ -119,4 +125,5 @@ abstract class _Paths {
   static const STAFF = '/staff';
   static const ADD_STAFF = '/add-staff';
   static const ORDER_ALLOCATION = '/order-allocation';
+  static const ORDER_DETAIL = '/order-detail';
 }

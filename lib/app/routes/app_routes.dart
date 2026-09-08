@@ -13,6 +13,7 @@ abstract class Routes {
   static const STAFF = _Paths.STAFF;
   static const ADD_STAFF = _Paths.ADD_STAFF;
   static const ORDER_ALLOCATION = _Paths.ORDER_ALLOCATION;
+  static const ORDER_DETAIL = _Paths.ORDER_DETAIL;
 }
 
 abstract class _Paths {
@@ -30,4 +31,5 @@ abstract class _Paths {
   static const STAFF = '/staff';
   static const ADD_STAFF = '/add-staff';
   static const ORDER_ALLOCATION = '/order-allocation';
+  static const ORDER_DETAIL = '/order-detail';
 }
