@@ -561,17 +561,11 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
                         children: [
                           _buildDateTimePicker(
                             context,
-                            title: "visiting_date".tr,
+                            title: "visiting_date_time".tr,
                             dateObs: controller.visitingDate,
-                            onDateChanged: controller.updateVisitingDate,
-                          ),
-                          const Divider(),
-                          _buildDateTimePicker(
-                            context,
-                            title: "visiting_time".tr,
                             timeObs: controller.visitingTime,
+                            onDateChanged: controller.updateVisitingDate,
                             onTimeChanged: controller.updateVisitingTime,
-                            isTime: true,
                           ),
                         ],
                       ),
@@ -593,17 +587,11 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
                         children: [
                           _buildDateTimePicker(
                             context,
-                            title: "order_date".tr,
+                            title: "order_date_time".tr,
                             dateObs: controller.bookingDate,
-                            onDateChanged: controller.updateBookingDate,
-                          ),
-                          const Divider(),
-                          _buildDateTimePicker(
-                            context,
-                            title: "order_time".tr,
                             timeObs: controller.bookingTime,
+                            onDateChanged: controller.updateBookingDate,
                             onTimeChanged: controller.updateBookingTime,
-                            isTime: true,
                           ),
                         ],
                       ),
@@ -691,61 +679,7 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
                       },
                     ),
 
-                    Obx(() {
-                      if (controller.isQuickBill)
-                        return const SizedBox.shrink();
-                      return Column(
-                        children: [
-                          const SizedBox(height: 15),
-                          InkWell(
-                            onTap: () =>
-                                _showMultiSelectCategoryDialog(context),
-                            child: InputDecorator(
-                              decoration: InputDecoration(
-                                labelText: "service_category".tr,
-                                prefixIcon: const Icon(Icons.category_outlined),
-                                suffixIcon: const Icon(Icons.arrow_drop_down),
-                              ),
-                              child: controller.selectedCategories.isEmpty
-                                  ? Text(
-                                      "select_category".tr,
-                                      style: const TextStyle(
-                                        color: Colors.grey,
-                                      ),
-                                    )
-                                  : Wrap(
-                                      spacing: 6.0,
-                                      runSpacing: -8.0,
-                                      children: controller.selectedCategories
-                                          .map((c) {
-                                            return Chip(
-                                              label: Text(
-                                                c,
-                                                style: const TextStyle(
-                                                  fontSize: 12,
-                                                ),
-                                              ),
-                                              padding: EdgeInsets.zero,
-                                              visualDensity:
-                                                  VisualDensity.compact,
-                                              backgroundColor: AppColors.primary
-                                                  .withOpacity(0.1),
-                                              deleteIcon: const Icon(
-                                                Icons.close,
-                                                size: 14,
-                                              ),
-                                              onDeleted: () =>
-                                                  controller.toggleCategory(c),
-                                              side: BorderSide.none,
-                                            );
-                                          })
-                                          .toList(),
-                                    ),
-                            ),
-                          ),
-                        ],
-                      );
-                    }),
+
                   ],
                 ),
               ),
@@ -920,68 +854,7 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
     );
   }
 
-  void _showMultiSelectCategoryDialog(BuildContext context) {
-    Get.bottomSheet(
-      Container(
-        padding: const EdgeInsets.symmetric(vertical: 20),
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              child: Text(
-                "service_category".tr,
-                style: const TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
-                ),
-              ),
-            ),
-            const Divider(),
-            Flexible(
-              child: SingleChildScrollView(
-                child: Obx(
-                  () => Column(
-                    children: controller.categories.map((c) {
-                      final isSelected = controller.selectedCategories.contains(
-                        c,
-                      );
-                      return CheckboxListTile(
-                        title: Text(c),
-                        value: isSelected,
-                        activeColor: AppColors.primary,
-                        onChanged: (bool? value) {
-                          controller.toggleCategory(c);
-                        },
-                      );
-                    }).toList(),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            ElevatedButton(
-              onPressed: () => Get.back(),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-              ),
-              child: Text(
-                "done".tr,
-                style: const TextStyle(color: Colors.white),
-              ),
-            ),
-            const SizedBox(height: 10),
-          ],
-        ),
-      ),
-      isScrollControlled: true,
-    );
-  }
+
 
   void _showMultiSelectServiceDialog(BuildContext context) {
     controller.serviceSearchQuery.value = '';
@@ -1096,43 +969,52 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
   Widget _buildDateTimePicker(
     BuildContext context, {
     required String title,
-    Rx<DateTime>? dateObs,
-    Rx<TimeOfDay>? timeObs,
-    Function(DateTime)? onDateChanged,
-    Function(TimeOfDay)? onTimeChanged,
-    bool isTime = false,
+    required Rx<DateTime> dateObs,
+    required Rx<TimeOfDay> timeObs,
+    required Function(DateTime) onDateChanged,
+    required Function(TimeOfDay) onTimeChanged,
   }) {
     return Obx(
-      () => ListTile(
-        title: Text(title),
-        subtitle: Text(
-          isTime
-              ? timeObs!.value.format(context)
-              : DateFormat('dd MMM yyyy').format(dateObs!.value),
-        ),
-        leading: Icon(
-          isTime ? Icons.access_time_outlined : Icons.calendar_today_outlined,
-        ),
-        trailing: Icon(isTime ? Icons.edit : Icons.edit_calendar, size: 20),
-        contentPadding: EdgeInsets.zero,
-        onTap: () async {
-          if (isTime) {
-            final time = await showTimePicker(
-              context: context,
-              initialTime: timeObs!.value,
-            );
-            if (time != null) onTimeChanged!(time);
-          } else {
+      () {
+        final dateStr = DateFormat('dd MMM yyyy').format(dateObs.value);
+        final timeStr = timeObs.value.format(context);
+        return ListTile(
+          title: Text(title),
+          subtitle: Text(
+            "$dateStr, $timeStr",
+            style: const TextStyle(
+              fontWeight: FontWeight.w600,
+              color: AppColors.primary,
+            ),
+          ),
+          leading: const Icon(
+            Icons.event_available_outlined,
+            color: AppColors.primary,
+          ),
+          trailing: const Icon(Icons.edit_calendar, size: 20, color: AppColors.primary),
+          contentPadding: EdgeInsets.zero,
+          onTap: () async {
             final date = await showDatePicker(
               context: context,
-              initialDate: dateObs!.value,
+              initialDate: dateObs.value,
               firstDate: DateTime.now().subtract(const Duration(days: 365)),
               lastDate: DateTime.now().add(const Duration(days: 365)),
             );
-            if (date != null) onDateChanged!(date);
-          }
-        },
-      ),
+            if (date != null) {
+              onDateChanged(date);
+              if (context.mounted) {
+                final time = await showTimePicker(
+                  context: context,
+                  initialTime: timeObs.value,
+                );
+                if (time != null) {
+                  onTimeChanged(time);
+                }
+              }
+            }
+          },
+        );
+      },
     );
   }
 

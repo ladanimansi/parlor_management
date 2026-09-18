@@ -128,7 +128,7 @@ class BookAppointmentController extends GetxController {
   final selectedStatus = 'Waiting'.obs;
 
   final categories = ['General', 'Hair', 'Skin Care', 'Makeup', 'Nail Care', 'Spa'];
-  final statuses = ['Waiting', 'InProgress', 'Confirm', 'Inquiry', 'Completed', 'Cancelled'];
+  final statuses = ['Waiting', 'Advance', 'InProgress', 'Confirm', 'Inquiry', 'Completed', 'Cancelled'];
 
   @override
   void onInit() {
@@ -302,7 +302,21 @@ class BookAppointmentController extends GetxController {
     super.onClose();
   }
 
-  void updateVisitingDate(DateTime date) => visitingDate.value = date;
+  void updateVisitingDate(DateTime date) {
+    visitingDate.value = date;
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final selectedDay = DateTime(date.year, date.month, date.day);
+    if (selectedDay.isAfter(today) || selectedBookingType.value != 'Walk in orders') {
+      if (selectedStatus.value == 'Waiting') {
+        selectedStatus.value = 'Advance';
+      }
+    } else if (selectedDay.isAtSameMomentAs(today) && selectedBookingType.value == 'Walk in orders') {
+      if (selectedStatus.value == 'Advance') {
+        selectedStatus.value = 'Waiting';
+      }
+    }
+  }
   void updateVisitingTime(TimeOfDay time) => visitingTime.value = time;
   
   void updateBookingDate(DateTime date) => bookingDate.value = date;
@@ -345,6 +359,11 @@ class BookAppointmentController extends GetxController {
   void selectBookingType(String type) {
     if (!isEdit.value) {
       selectedBookingType.value = type;
+      if (type != 'Walk in orders') {
+        selectedStatus.value = 'Advance';
+      } else {
+        selectedStatus.value = 'Waiting';
+      }
     }
   }
 
@@ -389,7 +408,7 @@ class BookAppointmentController extends GetxController {
         bookingTime.value.hour,
         bookingTime.value.minute,
       );
-      status = selectedStatus.value;
+      status = selectedStatus.value == 'Waiting' ? 'Advance' : selectedStatus.value;
       notes = notesController.text.isEmpty ? null : notesController.text;
       referenceBy = referenceByController.text.isEmpty ? null : referenceByController.text;
     }

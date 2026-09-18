@@ -67,6 +67,10 @@ class OrdersController extends GetxController {
         }
         return o.allocatedStaffId == null || o.allocatedStaffId!.isEmpty;
       }).toList();
+    } else if (tab == 'Advance') {
+      list = list.where((o) =>
+          o.status.toLowerCase() == 'advance' ||
+          o.status.toLowerCase() == 'advance booked').toList();
     } else if (tab == 'Completed') {
       list = list.where((o) => o.status == 'Completed').toList();
     } else if (tab == 'Waiting') {
@@ -120,7 +124,7 @@ class OrdersController extends GetxController {
 
     // Order status can move to InProgress ONLY if staff is allocated
     String overallStatus = order.status;
-    if (hasStaff && (overallStatus == 'Inquiry' || overallStatus == 'Confirm' || overallStatus == 'Waiting')) {
+    if (hasStaff && (overallStatus == 'Inquiry' || overallStatus == 'Confirm' || overallStatus == 'Waiting' || overallStatus == 'Advance')) {
       overallStatus = 'InProgress';
     }
 
@@ -159,7 +163,7 @@ class OrdersController extends GetxController {
     }).toList();
 
     String overallStatus = order.status;
-    if (overallStatus == 'Confirm' || overallStatus == 'Waiting') {
+    if (overallStatus == 'Confirm' || overallStatus == 'Waiting' || overallStatus == 'Advance') {
       overallStatus = 'InProgress';
     }
 

@@ -148,6 +148,10 @@ class OrdersView extends GetView<OrdersController> {
                   final currentTab = controller.activeTab.value;
                   final allOrders = controller.allOrders;
 
+                  final advanceCount = allOrders.where((o) =>
+                      o.status.toLowerCase() == 'advance' ||
+                      o.status.toLowerCase() == 'advance booked').length;
+
                   final inProgressCount = allOrders.where((o) =>
                       o.status == 'InProgress' ||
                       o.status == 'Confirm' ||
@@ -164,6 +168,7 @@ class OrdersView extends GetView<OrdersController> {
 
                   final tabs = [
                     {'key': 'All', 'label': 'All Orders', 'count': allOrders.length},
+                    {'key': 'Advance', 'label': 'Advance Orders', 'count': advanceCount},
                     {'key': 'InProgress', 'label': 'In Progress', 'count': inProgressCount},
                     {'key': 'PendingAllocation', 'label': 'Pending Staff', 'count': pendingStaffCount},
                     {'key': 'Completed', 'label': 'Completed', 'count': completedCount},
@@ -476,7 +481,7 @@ class OrdersView extends GetView<OrdersController> {
                         fontWeight: FontWeight.bold,
                         color: statusColor,
                       ),
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),

@@ -74,6 +74,9 @@ class AppointmentModel {
 
   String get statusKey {
     switch (status.toLowerCase()) {
+      case 'advance':
+      case 'advance booked':
+        return 'advance_booked';
       case 'confirm':
         return 'confirm';
       case 'inprogress':
@@ -91,6 +94,9 @@ class AppointmentModel {
 
   Color get statusColor {
     switch (status.toLowerCase()) {
+      case 'advance':
+      case 'advance booked':
+        return Colors.teal;
       case 'confirm':
         return Colors.green;
       case 'inprogress':
