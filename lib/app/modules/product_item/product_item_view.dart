@@ -14,8 +14,8 @@ class ProductItemView extends GetView<ProductItemController> {
   void _confirmDelete(BuildContext context, String id) {
     Get.dialog(
       AlertDialog(
-        title: const Text("Delete Product Item"),
-        content: const Text("Are you sure you want to delete this item?"),
+        title: const Text("Delete Product"),
+        content: const Text("Are you sure you want to delete this product?"),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
@@ -38,12 +38,12 @@ class ProductItemView extends GetView<ProductItemController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Product Item'),
+        title: const Text('Products'),
         centerTitle: true,
       ),
       body: Obx(() {
         if (controller.items.isEmpty) {
-          return const Center(child: Text("No product items found."));
+          return const Center(child: Text("No products found."));
         }
         return ListView.builder(
           padding: const EdgeInsets.all(16.0),
@@ -58,7 +58,7 @@ class ProductItemView extends GetView<ProductItemController> {
                   item["name"],
                   style: const TextStyle(fontWeight: FontWeight.bold),
                 ),
-                subtitle: Text("Category: ${item['category']} | Price: ₹${item['price']}"),
+                subtitle: Text("Service: ${item['category']} | Price: ₹${item['price']}"),
                 trailing: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [

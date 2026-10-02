@@ -14,22 +14,34 @@ class MenuView extends GetView<MenuController> {
         padding: const EdgeInsets.all(16.0),
         children: [
           ExpansionTile(
-            leading: const Icon(Icons.inventory, color: AppColors.primary),
+            leading: const Icon(Icons.spa, color: AppColors.primary),
             title: const Text(
-              "Product Master",
+              "Services",
               style: TextStyle(fontWeight: FontWeight.bold),
             ),
             children: [
               ListTile(
-                leading: const Icon(Icons.category, color: Colors.grey),
-                title: const Text("Product Category"),
+                leading: const Icon(Icons.spa_outlined, color: Colors.grey),
+                title: const Text("Services List"),
+                subtitle: const Text("Hair Cut, Facial, Eyebrow, etc."),
                 onTap: () {
                   Get.toNamed(Routes.PRODUCT_CATEGORY);
                 },
               ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          ExpansionTile(
+            leading: const Icon(Icons.inventory_2, color: AppColors.primary),
+            title: const Text(
+              "Products",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            children: [
               ListTile(
-                leading: const Icon(Icons.shopping_bag, color: Colors.grey),
-                title: const Text("Product Item"),
+                leading: const Icon(Icons.shopping_bag_outlined, color: Colors.grey),
+                title: const Text("Products List"),
+                subtitle: const Text("Herbal Kit, Gold Kit, Serum, etc."),
                 onTap: () {
                   Get.toNamed(Routes.PRODUCT_ITEM);
                 },

@@ -14,7 +14,7 @@ class AddProductCategoryView extends GetView<ProductCategoryController> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEdit ? "Edit Category" : "Add Category"),
+        title: Text(isEdit ? "Edit Service" : "Add Service"),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -25,9 +25,9 @@ class AddProductCategoryView extends GetView<ProductCategoryController> {
             TextField(
               controller: textController,
               decoration: InputDecoration(
-                hintText: "E.g., Hair Care, Facial...",
-                labelText: "Category Name",
-                prefixIcon: const Icon(Icons.category_outlined, color: AppColors.primary),
+                hintText: "E.g., Hair Cut, Facial, Eyebrow...",
+                labelText: "Service Name",
+                prefixIcon: const Icon(Icons.spa_outlined, color: AppColors.primary),
                 filled: true,
                 fillColor: Colors.grey[50],
                 border: OutlineInputBorder(
@@ -65,7 +65,7 @@ class AddProductCategoryView extends GetView<ProductCategoryController> {
                 }
               },
               child: Text(
-                isEdit ? "Update Category" : "Save Category", 
+                isEdit ? "Update Service" : "Save Service", 
                 style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)
               ),
             ),

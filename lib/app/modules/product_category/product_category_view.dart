@@ -14,8 +14,8 @@ class ProductCategoryView extends GetView<ProductCategoryController> {
   void _confirmDelete(BuildContext context, String id) {
     Get.dialog(
       AlertDialog(
-        title: const Text("Delete Category"),
-        content: const Text("Are you sure you want to delete this category?"),
+        title: const Text("Delete Service"),
+        content: const Text("Are you sure you want to delete this service?"),
         actions: [
           TextButton(
             onPressed: () => Get.back(),
@@ -38,12 +38,12 @@ class ProductCategoryView extends GetView<ProductCategoryController> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Product Category'),
+        title: const Text('Services'),
         centerTitle: true,
       ),
       body: Obx(() {
         if (controller.categories.isEmpty) {
-          return const Center(child: Text("No categories found."));
+          return const Center(child: Text("No services found."));
         }
         return ListView.builder(
           padding: const EdgeInsets.all(16.0),

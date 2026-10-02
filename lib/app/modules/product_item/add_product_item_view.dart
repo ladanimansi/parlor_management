@@ -47,11 +47,143 @@ class _AddProductItemViewState extends State<AddProductItemView> {
     super.dispose();
   }
 
+  void _showQuickAddServiceDialog() {
+    final textController = TextEditingController();
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        elevation: 8,
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.spa_outlined,
+                      color: AppColors.primary,
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    "Add New Service",
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 18),
+              TextField(
+                controller: textController,
+                autofocus: true,
+                textCapitalization: TextCapitalization.words,
+                decoration: InputDecoration(
+                  labelText: "Service Name",
+                  hintText: "e.g. Hair Cut, Facial, Eyebrow",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  focusedBorder: const OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(12)),
+                    borderSide: BorderSide(color: AppColors.primary, width: 2),
+                  ),
+                  prefixIcon: const Icon(Icons.edit_note_rounded),
+                ),
+                onSubmitted: (val) {
+                  final name = val.trim();
+                  if (name.isNotEmpty) {
+                    categoryController.addCategory(name);
+                    setState(() {
+                      selectedCategory = name;
+                    });
+                    Get.back();
+                    Get.snackbar(
+                      "Success",
+                      "Service '$name' added successfully",
+                      snackPosition: SnackPosition.BOTTOM,
+                      backgroundColor: Colors.green.shade600,
+                      colorText: Colors.white,
+                      duration: const Duration(seconds: 2),
+                      margin: const EdgeInsets.all(12),
+                      borderRadius: 10,
+                    );
+                  }
+                },
+              ),
+              const SizedBox(height: 22),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Get.back(),
+                    child: const Text(
+                      "Cancel",
+                      style: TextStyle(color: Colors.grey, fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  ElevatedButton(
+                    onPressed: () {
+                      final name = textController.text.trim();
+                      if (name.isNotEmpty) {
+                        categoryController.addCategory(name);
+                        setState(() {
+                          selectedCategory = name;
+                        });
+                        Get.back();
+                        Get.snackbar(
+                          "Success",
+                          "Service '$name' added successfully",
+                          snackPosition: SnackPosition.BOTTOM,
+                          backgroundColor: Colors.green.shade600,
+                          colorText: Colors.white,
+                          duration: const Duration(seconds: 2),
+                          margin: const EdgeInsets.all(12),
+                          borderRadius: 10,
+                        );
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 11),
+                    ),
+                    child: const Text(
+                      "Add Service",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(isEdit ? "Edit Product Item" : "Add Product Item"),
+        title: Text(isEdit ? "Edit Product" : "Add Product"),
         centerTitle: true,
       ),
       body: SingleChildScrollView(
@@ -62,9 +194,9 @@ class _AddProductItemViewState extends State<AddProductItemView> {
             TextField(
               controller: nameController,
               decoration: InputDecoration(
-                hintText: "E.g., Gold Facial, Hair Spa...",
-                labelText: "Item Name",
-                prefixIcon: const Icon(Icons.shopping_bag_outlined, color: AppColors.primary),
+                hintText: "E.g., Herbal Kit, Gold Facial Kit, Serum...",
+                labelText: "Product Name",
+                prefixIcon: const Icon(Icons.inventory_2_outlined, color: AppColors.primary),
                 filled: true,
                 fillColor: Colors.grey[50],
                 border: OutlineInputBorder(
@@ -101,38 +233,76 @@ class _AddProductItemViewState extends State<AddProductItemView> {
               keyboardType: TextInputType.number,
             ),
             const SizedBox(height: 20),
-            DropdownButtonFormField<String>(
-              value: selectedCategory,
-              icon: const Icon(Icons.keyboard_arrow_down, color: AppColors.primary),
-              decoration: InputDecoration(
-                labelText: "Category",
-                prefixIcon: const Icon(Icons.category_outlined, color: AppColors.primary),
-                filled: true,
-                fillColor: Colors.grey[50],
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: BorderSide.none,
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(16),
-                  borderSide: const BorderSide(color: AppColors.primary, width: 2),
-                ),
-                contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
-              ),
-              items: categoryController.categories.map((category) {
-                return DropdownMenuItem<String>(
-                  value: category["name"],
-                  child: Text(category["name"]),
-                );
-              }).toList(),
-              onChanged: (val) {
-                if (val != null) {
-                  setState(() {
-                    selectedCategory = val;
-                  });
-                }
-              },
-            ),
+            Obx(() {
+              final servicesList = categoryController.categories
+                  .map((c) => c["name"]?.toString() ?? "")
+                  .where((name) => name.isNotEmpty)
+                  .toList();
+
+              if (selectedCategory != null && !servicesList.contains(selectedCategory)) {
+                selectedCategory = servicesList.isNotEmpty ? servicesList.first : null;
+              } else if (selectedCategory == null && servicesList.isNotEmpty) {
+                selectedCategory = servicesList.first;
+              }
+
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Expanded(
+                    child: DropdownButtonFormField<String>(
+                      value: selectedCategory,
+                      icon: const Icon(Icons.keyboard_arrow_down, color: AppColors.primary),
+                      decoration: InputDecoration(
+                        labelText: "Service",
+                        hintText: "Select Service",
+                        prefixIcon: const Icon(Icons.spa_outlined, color: AppColors.primary),
+                        filled: true,
+                        fillColor: Colors.grey[50],
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(16),
+                          borderSide: BorderSide.none,
+                        ),
+                        focusedBorder: const OutlineInputBorder(
+                          borderRadius: BorderRadius.all(Radius.circular(16)),
+                          borderSide: BorderSide(color: AppColors.primary, width: 2),
+                        ),
+                        contentPadding: const EdgeInsets.symmetric(vertical: 18, horizontal: 20),
+                      ),
+                      items: servicesList.map((serviceName) {
+                        return DropdownMenuItem<String>(
+                          value: serviceName,
+                          child: Text(serviceName),
+                        );
+                      }).toList(),
+                      onChanged: (val) {
+                        setState(() {
+                          selectedCategory = val;
+                        });
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Material(
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(14),
+                    elevation: 2,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(14),
+                      onTap: _showQuickAddServiceDialog,
+                      child: const SizedBox(
+                        height: 54,
+                        width: 54,
+                        child: Icon(
+                          Icons.add,
+                          color: Colors.white,
+                          size: 28,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            }),
             const SizedBox(height: 40),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
@@ -156,7 +326,7 @@ class _AddProductItemViewState extends State<AddProductItemView> {
                 }
               },
               child: Text(
-                isEdit ? "Update Item" : "Save Item", 
+                isEdit ? "Update Product" : "Save Product", 
                 style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)
               ),
             ),
