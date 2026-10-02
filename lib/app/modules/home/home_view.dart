@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../core/theme/app_colors.dart';
 import '../dashboard/dashboard_view.dart';
-import '../services/services_view.dart';
 import '../appointments/appointments_view.dart';
 import 'home_controller.dart';
 import 'profile_view.dart';
@@ -14,7 +13,6 @@ class HomeView extends GetView<HomeController> {
   Widget build(BuildContext context) {
     final List<Widget> pages = [
       const DashboardView(),
-      const ServicesView(),
       const MenuView(),
       const ProfileView(),
     ];
@@ -48,10 +46,6 @@ class HomeView extends GetView<HomeController> {
               BottomNavigationBarItem(
                 icon: const Icon(Icons.calendar_today),
                 label: "home".tr,
-              ),
-              BottomNavigationBarItem(
-                icon: const Icon(Icons.spa),
-                label: "services".tr,
               ),
               BottomNavigationBarItem(
                 icon: const Icon(Icons.list_alt),

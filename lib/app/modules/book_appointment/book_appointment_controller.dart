@@ -68,16 +68,18 @@ class BookAppointmentController extends GetxController {
       
       // Auto-calculate billing amount based on service prices
       double total = 0;
-      final servicesController = Get.find<ServicesController>();
       final Set<String> newRequiredProductIds = {};
       
-      for (final serviceName in selectedServices) {
-        final serviceModel = servicesController.allServices.firstWhereOrNull(
-          (s) => s.name.toLowerCase() == serviceName.toLowerCase()
-        );
-        if (serviceModel != null) {
-          total += serviceModel.price;
-          newRequiredProductIds.addAll(serviceModel.requiredProductIds);
+      if (Get.isRegistered<ServicesController>()) {
+        final servicesController = Get.find<ServicesController>();
+        for (final serviceName in selectedServices) {
+          final serviceModel = servicesController.allServices.firstWhereOrNull(
+            (s) => s.name.toLowerCase() == serviceName.toLowerCase()
+          );
+          if (serviceModel != null) {
+            total += serviceModel.price;
+            newRequiredProductIds.addAll(serviceModel.requiredProductIds);
+          }
         }
       }
       amountController.text = total.toStringAsFixed(0);
