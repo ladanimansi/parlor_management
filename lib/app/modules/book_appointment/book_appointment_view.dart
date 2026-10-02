@@ -619,59 +619,88 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
                           return Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              InkWell(
-                                onTap: () =>
-                                    _showMultiSelectServiceDialog(context),
-                                child: InputDecorator(
-                                  decoration: InputDecoration(
-                                    labelText: "service_category".tr,
-                                    prefixIcon: const Icon(
-                                      Icons.category_outlined,
-                                    ),
-                                    suffixIcon: const Icon(
-                                      Icons.arrow_drop_down,
-                                    ),
-                                    errorText: hasError ? errorText : null,
-                                  ),
-                                  child: controller.selectedServices.isEmpty
-                                      ? Text(
-                                          "select_service".tr,
-                                          style: const TextStyle(
-                                            color: Colors.grey,
+                              Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    child: InkWell(
+                                      onTap: () =>
+                                          _showMultiSelectServiceDialog(context),
+                                      child: InputDecorator(
+                                        decoration: InputDecoration(
+                                          labelText: "service_category".tr,
+                                          prefixIcon: const Icon(
+                                            Icons.category_outlined,
                                           ),
-                                        )
-                                      : Wrap(
-                                          spacing: 6.0,
-                                          runSpacing: -8.0,
-                                          children: controller.selectedServices
-                                              .map((categoryName) {
-                                                return Chip(
-                                                  label: Text(
-                                                    categoryName,
-                                                    style: const TextStyle(
-                                                      fontSize: 12,
-                                                    ),
-                                                  ),
-                                                  padding: EdgeInsets.zero,
-                                                  visualDensity:
-                                                      VisualDensity.compact,
-                                                  backgroundColor: AppColors
-                                                      .primary
-                                                      .withOpacity(0.1),
-                                                  deleteIcon: const Icon(
-                                                    Icons.close,
-                                                    size: 14,
-                                                  ),
-                                                  onDeleted: () =>
-                                                      controller.toggleService(
-                                                        categoryName,
-                                                      ),
-                                                  side: BorderSide.none,
-                                                );
-                                              })
-                                              .toList(),
+                                          suffixIcon: const Icon(
+                                            Icons.arrow_drop_down,
+                                          ),
+                                          errorText: hasError ? errorText : null,
                                         ),
-                                ),
+                                        child: controller.selectedServices.isEmpty
+                                            ? Text(
+                                                "select_service".tr,
+                                                style: const TextStyle(
+                                                  color: Colors.grey,
+                                                ),
+                                              )
+                                            : Wrap(
+                                                spacing: 6.0,
+                                                runSpacing: -8.0,
+                                                children: controller.selectedServices
+                                                    .map((categoryName) {
+                                                      return Chip(
+                                                        label: Text(
+                                                          categoryName,
+                                                          style: const TextStyle(
+                                                            fontSize: 12,
+                                                          ),
+                                                        ),
+                                                        padding: EdgeInsets.zero,
+                                                        visualDensity:
+                                                            VisualDensity.compact,
+                                                        backgroundColor: AppColors
+                                                            .primary
+                                                            .withOpacity(0.1),
+                                                        deleteIcon: const Icon(
+                                                          Icons.close,
+                                                          size: 14,
+                                                        ),
+                                                        onDeleted: () =>
+                                                            controller.toggleService(
+                                                              categoryName,
+                                                            ),
+                                                        side: BorderSide.none,
+                                                      );
+                                                    })
+                                                    .toList(),
+                                              ),
+                                      ),
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Padding(
+                                    padding: const EdgeInsets.only(top: 4.0),
+                                    child: Material(
+                                      color: AppColors.primary,
+                                      borderRadius: BorderRadius.circular(12),
+                                      elevation: 2,
+                                      child: InkWell(
+                                        borderRadius: BorderRadius.circular(12),
+                                        onTap: () => _showQuickAddCategoryDialog(context),
+                                        child: const SizedBox(
+                                          height: 50,
+                                          width: 50,
+                                          child: Icon(
+                                            Icons.add,
+                                            color: Colors.white,
+                                            size: 26,
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ],
                               ),
                             ],
                           );
@@ -881,9 +910,23 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
                       color: AppColors.primary,
                     ),
                   ),
-                  IconButton(
-                    icon: const Icon(Icons.close),
-                    onPressed: () => Get.back(),
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      IconButton(
+                        tooltip: "Add Category",
+                        icon: const Icon(
+                          Icons.add_circle,
+                          color: AppColors.primary,
+                          size: 26,
+                        ),
+                        onPressed: () => _showQuickAddCategoryDialog(context),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.close),
+                        onPressed: () => Get.back(),
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -908,9 +951,37 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
                 child: Obx(() {
                   final cats = controller.filteredCategories;
                   if (cats.isEmpty) {
-                    return const Padding(
-                      padding: EdgeInsets.all(20.0),
-                      child: Text("No categories found"),
+                    return Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.category_outlined,
+                            size: 40,
+                            color: Colors.grey.shade400,
+                          ),
+                          const SizedBox(height: 8),
+                          const Text(
+                            "No categories found",
+                            style: TextStyle(color: Colors.grey),
+                          ),
+                          const SizedBox(height: 12),
+                          ElevatedButton.icon(
+                            onPressed: () =>
+                                _showQuickAddCategoryDialog(context),
+                            icon: const Icon(Icons.add, size: 18),
+                            label: const Text("Add Category"),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: Colors.white,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     );
                   }
                   return Column(
@@ -963,6 +1034,138 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
         ),
       ),
       isScrollControlled: true,
+    );
+  }
+
+  void _showQuickAddCategoryDialog(BuildContext context) {
+    final textController = TextEditingController();
+    Get.dialog(
+      Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+        ),
+        elevation: 8,
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withOpacity(0.12),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(
+                      Icons.category_rounded,
+                      color: AppColors.primary,
+                      size: 22,
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  const Text(
+                    "Add Service Category",
+                    style: TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 18),
+              TextField(
+                controller: textController,
+                autofocus: true,
+                textCapitalization: TextCapitalization.words,
+                decoration: InputDecoration(
+                  labelText: "Category Name",
+                  hintText: "e.g. Hair Cut, Facial, Spa",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  focusedBorder: const OutlineInputBorder(
+                    borderRadius: BorderRadius.all(Radius.circular(12)),
+                    borderSide: BorderSide(color: AppColors.primary, width: 2),
+                  ),
+                  prefixIcon: const Icon(Icons.edit_note_rounded),
+                ),
+                onSubmitted: (val) {
+                  final name = val.trim();
+                  if (name.isNotEmpty) {
+                    controller.addQuickCategory(name);
+                    Get.back();
+                    Get.snackbar(
+                      "Success",
+                      "Category '$name' added successfully",
+                      snackPosition: SnackPosition.BOTTOM,
+                      backgroundColor: Colors.green.shade600,
+                      colorText: Colors.white,
+                      duration: const Duration(seconds: 2),
+                      margin: const EdgeInsets.all(12),
+                      borderRadius: 10,
+                    );
+                  }
+                },
+              ),
+              const SizedBox(height: 22),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Get.back(),
+                    child: Text(
+                      "cancel".tr.isNotEmpty ? "cancel".tr : "Cancel",
+                      style: const TextStyle(
+                        color: Colors.grey,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  ElevatedButton(
+                    onPressed: () {
+                      final name = textController.text.trim();
+                      if (name.isNotEmpty) {
+                        controller.addQuickCategory(name);
+                        Get.back();
+                        Get.snackbar(
+                          "Success",
+                          "Category '$name' added successfully",
+                          snackPosition: SnackPosition.BOTTOM,
+                          backgroundColor: Colors.green.shade600,
+                          colorText: Colors.white,
+                          duration: const Duration(seconds: 2),
+                          margin: const EdgeInsets.all(12),
+                          borderRadius: 10,
+                        );
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 20,
+                        vertical: 11,
+                      ),
+                    ),
+                    child: const Text(
+                      "Add Category",
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
 

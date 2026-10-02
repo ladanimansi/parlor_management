@@ -278,6 +278,27 @@ class AdminController extends GetxController {
     );
   }
 
+  /// Delete any sample/mock data stored under default_parlor or test parlors in Firestore
+  Future<void> clearSampleParlorData() async {
+    try {
+      isLoading.value = true;
+      final defaultParlorRef = _firestore.collection('parlors').doc('default_parlor');
+      for (final sub in ['appointments', 'customers', 'staff', 'services', 'products', 'categories']) {
+        final snap = await defaultParlorRef.collection(sub).get();
+        final batch = _firestore.batch();
+        for (final doc in snap.docs) {
+          batch.delete(doc.reference);
+        }
+        await batch.commit();
+      }
+      _showSnackbar('Cleaned', 'All sample / mock parlor data deleted from Firebase!');
+    } catch (e) {
+      _showSnackbar('Error', 'Failed to clear sample data: $e', isError: true);
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
   void logout() {
     final storage = GetStorage();
     storage.erase();

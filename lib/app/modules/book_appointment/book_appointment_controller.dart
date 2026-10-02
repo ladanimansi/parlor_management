@@ -95,9 +95,31 @@ class BookAppointmentController extends GetxController {
     }
   }
 
+  void addQuickCategory(String categoryName) {
+    final trimmed = categoryName.trim();
+    if (trimmed.isEmpty) return;
+
+    ProductCategoryController categoryController;
+    if (Get.isRegistered<ProductCategoryController>()) {
+      categoryController = Get.find<ProductCategoryController>();
+    } else {
+      categoryController = Get.put(ProductCategoryController(), permanent: true);
+    }
+
+    categoryController.addCategory(trimmed);
+    if (!availableCategories.contains(trimmed)) {
+      availableCategories.add(trimmed);
+    }
+    if (!selectedServices.contains(trimmed)) {
+      toggleService(trimmed);
+    }
+  }
+
   void _loadServicesFromProductMaster() {
     try {
-      final categoryController = Get.find<ProductCategoryController>();
+      final categoryController = Get.isRegistered<ProductCategoryController>()
+          ? Get.find<ProductCategoryController>()
+          : Get.put(ProductCategoryController(), permanent: true);
       final activeCategories = categoryController.categories
           .where((cat) => cat['status'] == true)
           .map<String>((cat) => cat['name']?.toString() ?? '')
@@ -143,6 +165,13 @@ class BookAppointmentController extends GetxController {
         final productItemController = Get.put(ProductItemController());
         availableProducts.assignAll(productItemController.items);
       }
+    } catch (_) {}
+
+    try {
+      final categoryController = Get.isRegistered<ProductCategoryController>()
+          ? Get.find<ProductCategoryController>()
+          : Get.put(ProductCategoryController(), permanent: true);
+      ever(categoryController.categories, (_) => _loadServicesFromProductMaster());
     } catch (_) {}
 
     _loadServicesFromProductMaster();
@@ -230,8 +259,6 @@ class BookAppointmentController extends GetxController {
       }
     }
   }
-
-  void _checkCustomerRegistration(String mobile) {}
 
   void checkPreviousBookings(String mobile) {}
 

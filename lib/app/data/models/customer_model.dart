@@ -26,9 +26,9 @@ class CustomerModel {
     };
   }
 
-  factory CustomerModel.fromMap(Map<String, dynamic> map) {
+  factory CustomerModel.fromMap(Map<String, dynamic> map, {String? docId}) {
     return CustomerModel(
-      id: map['id'] ?? '',
+      id: docId ?? map['id'] ?? '',
       name: map['name'] ?? '',
       mobileNumber: map['mobileNumber'] ?? '',
       age: map['age'] != null ? int.tryParse(map['age'].toString()) : null,

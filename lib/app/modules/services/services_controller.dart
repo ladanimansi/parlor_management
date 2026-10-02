@@ -1,6 +1,5 @@
 import 'package:get/get.dart';
 import '../../data/models/service_model.dart';
-import '../../data/repositories/service_repository.dart';
 
 class ServicesController extends GetxController {
   final services = <ServiceModel>[].obs;
@@ -49,7 +48,6 @@ class ServicesController extends GetxController {
   @override
   void onInit() {
     super.onInit();
-    allServices.assignAll(ServiceRepository.getStaticServices());
     _filterServices();
   }
 }

@@ -23,9 +23,9 @@ class StaffModel {
     };
   }
 
-  factory StaffModel.fromMap(Map<String, dynamic> map) {
+  factory StaffModel.fromMap(Map<String, dynamic> map, {String? docId}) {
     return StaffModel(
-      id: map['id'] ?? '',
+      id: docId ?? map['id'] ?? '',
       name: map['name'] ?? '',
       mobileNumber: map['mobileNumber'] ?? '',
       specialties: List<String>.from(map['specialties'] ?? []),
