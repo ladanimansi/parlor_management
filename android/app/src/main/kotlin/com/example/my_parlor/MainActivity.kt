@@ -1,4 +1,4 @@
-package com.example.my_parlor
+package com.maans.parlormanagement
 
 import io.flutter.embedding.android.FlutterActivity
 

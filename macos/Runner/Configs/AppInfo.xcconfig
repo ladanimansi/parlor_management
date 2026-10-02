@@ -8,7 +8,7 @@
 PRODUCT_NAME = my_parlor
 
 // The application's bundle identifier
-PRODUCT_BUNDLE_IDENTIFIER = com.example.myParlor
+PRODUCT_BUNDLE_IDENTIFIER = com.maans.parlormanagement
 
 // The copyright displayed in application information
-PRODUCT_COPYRIGHT = Copyright © 2026 com.example. All rights reserved.
+PRODUCT_COPYRIGHT = Copyright © 2026 com.maans.parlormanagement. All rights reserved.

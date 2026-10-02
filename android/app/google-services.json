@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "2996449144",
+    "project_id": "parlormanagement",
+    "storage_bucket": "parlormanagement.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:2996449144:android:85a66a212d4a551b7da28d",
+        "android_client_info": {
+          "package_name": "com.maans.parlormanagement"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCvL9OVg0yA6QOzVlsUoWOeueeWyAK4nII"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

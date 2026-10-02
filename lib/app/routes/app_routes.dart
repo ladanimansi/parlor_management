@@ -1,4 +1,5 @@
 abstract class Routes {
+  static const SPLASH = _Paths.SPLASH;
   static const HOME = _Paths.HOME;
   static const DASHBOARD = _Paths.DASHBOARD;
   static const SERVICES = _Paths.SERVICES;
@@ -17,6 +18,7 @@ abstract class Routes {
 }
 
 abstract class _Paths {
+  static const SPLASH = '/splash';
   static const HOME = '/home';
   static const DASHBOARD = '/dashboard';
   static const SERVICES = '/services';

@@ -1,4 +1,6 @@
 import 'package:get/get.dart';
+import '../modules/splash/splash_binding.dart';
+import '../modules/splash/splash_view.dart';
 import '../modules/home/home_binding.dart';
 import '../modules/home/home_view.dart';
 import '../modules/services/services_binding.dart';
@@ -31,9 +33,14 @@ import 'app_routes.dart';
 class AppPages {
   AppPages._();
 
-  static const INITIAL = Routes.HOME;
+  static const INITIAL = Routes.SPLASH;
 
   static final routes = [
+    GetPage(
+      name: _Paths.SPLASH,
+      page: () => const SplashView(),
+      binding: SplashBinding(),
+    ),
     GetPage(
       name: _Paths.HOME,
       page: () => const HomeView(),
@@ -111,6 +118,7 @@ class AppPages {
 }
 
 abstract class _Paths {
+  static const SPLASH = '/splash';
   static const HOME = '/home';
   static const DASHBOARD = '/dashboard';
   static const SERVICES = '/services';
