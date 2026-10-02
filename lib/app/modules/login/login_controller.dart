@@ -107,14 +107,57 @@ class LoginController extends GetxController {
         }
       }
 
-      // If other (client) email entered
+      // Check registered Parlors / Clients in Firestore
+      final parlorQuery = await _firestore
+          .collection('parlors')
+          .where('email', isEqualTo: email)
+          .where('password', isEqualTo: password)
+          .get();
+
+      if (parlorQuery.docs.isNotEmpty) {
+        final parlorData = parlorQuery.docs.first.data();
+        final bool isActive = parlorData['isActive'] ?? true;
+        final String parlorName = parlorData['parlorName'] ?? 'Parlor';
+
+        if (!isActive) {
+          Get.snackbar(
+            'Account Inactive',
+            'Your parlor account has been deactivated. Please contact administrator.',
+            snackPosition: SnackPosition.BOTTOM,
+            backgroundColor: AppColors.error.withValues(alpha: 0.12),
+            colorText: AppColors.error,
+            duration: const Duration(seconds: 4),
+          );
+          return;
+        }
+
+        // Save Parlor Session
+        await _storage.write('isLoggedIn', true);
+        await _storage.write('userEmail', email);
+        await _storage.write('userRole', 'parlor');
+        await _storage.write('parlorId', parlorQuery.docs.first.id);
+        await _storage.write('parlorName', parlorName);
+
+        Get.snackbar(
+          'Welcome',
+          'Welcome to $parlorName!',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: AppColors.success.withValues(alpha: 0.15),
+          colorText: AppColors.success,
+        );
+
+        // Navigate to Parlor Salon Dashboard
+        Get.offAllNamed(Routes.HOME);
+        return;
+      }
+
+      // If credentials do not match any admin or parlor
       Get.snackbar(
-        'Client Login',
-        'Client portal is coming soon. Please sign in with admin credentials.',
+        'Login Failed',
+        'Invalid email or password. Please check your credentials.',
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: AppColors.primary.withValues(alpha: 0.15),
-        colorText: AppColors.primary,
-        duration: const Duration(seconds: 3),
+        backgroundColor: AppColors.error.withValues(alpha: 0.1),
+        colorText: AppColors.error,
       );
     } catch (e) {
       Get.snackbar(

@@ -21,6 +21,8 @@ class SplashController extends GetxController {
 
     if (isLoggedIn && userRole == 'admin') {
       Get.offNamed(Routes.ADMIN);
+    } else if (isLoggedIn && userRole == 'parlor') {
+      Get.offNamed(Routes.HOME);
     } else {
       Get.offNamed(Routes.LOGIN);
     }

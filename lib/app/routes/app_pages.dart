@@ -30,6 +30,7 @@ import '../modules/order_allocation/order_allocation_binding.dart';
 import '../modules/order_allocation/order_allocation_view.dart';
 import '../modules/admin/admin_binding.dart';
 import '../modules/admin/admin_view.dart';
+import '../modules/admin/add_parlor_view.dart';
 import '../modules/login/login_binding.dart';
 import '../modules/login/login_view.dart';
 import 'app_routes.dart';
@@ -128,6 +129,11 @@ class AppPages {
       page: () => const LoginView(),
       binding: LoginBinding(),
     ),
+    GetPage(
+      name: _Paths.ADD_PARLOR,
+      page: () => const AddParlorView(),
+      binding: AdminBinding(),
+    ),
   ];
 }
 
@@ -150,4 +156,5 @@ abstract class _Paths {
   static const ORDER_DETAIL = '/order-detail';
   static const ADMIN = '/admin';
   static const LOGIN = '/login';
+  static const ADD_PARLOR = '/add-parlor';
 }
