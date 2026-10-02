@@ -28,6 +28,10 @@ import '../modules/staff/add_staff_binding.dart';
 import '../modules/staff/add_staff_view.dart';
 import '../modules/order_allocation/order_allocation_binding.dart';
 import '../modules/order_allocation/order_allocation_view.dart';
+import '../modules/admin/admin_binding.dart';
+import '../modules/admin/admin_view.dart';
+import '../modules/login/login_binding.dart';
+import '../modules/login/login_view.dart';
 import 'app_routes.dart';
 
 class AppPages {
@@ -114,6 +118,16 @@ class AppPages {
       page: () => const OrderDetailView(),
       binding: OrdersBinding(),
     ),
+    GetPage(
+      name: _Paths.ADMIN,
+      page: () => const AdminView(),
+      binding: AdminBinding(),
+    ),
+    GetPage(
+      name: _Paths.LOGIN,
+      page: () => const LoginView(),
+      binding: LoginBinding(),
+    ),
   ];
 }
 
@@ -134,4 +148,6 @@ abstract class _Paths {
   static const ADD_STAFF = '/add-staff';
   static const ORDER_ALLOCATION = '/order-allocation';
   static const ORDER_DETAIL = '/order-detail';
+  static const ADMIN = '/admin';
+  static const LOGIN = '/login';
 }

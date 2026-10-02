@@ -84,6 +84,24 @@ class MenuView extends GetView<MenuController> {
               ),
             ],
           ),
+          const SizedBox(height: 10),
+          ExpansionTile(
+            leading: const Icon(Icons.admin_panel_settings, color: AppColors.primary),
+            title: const Text(
+              "Admin Master",
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+            children: [
+              ListTile(
+                leading: const Icon(Icons.admin_panel_settings_outlined, color: Colors.grey),
+                title: const Text("Admin Portal"),
+                subtitle: const Text("Hello Admin & Credentials"),
+                onTap: () {
+                  Get.toNamed(Routes.ADMIN);
+                },
+              ),
+            ],
+          ),
         ],
       ),
     );
