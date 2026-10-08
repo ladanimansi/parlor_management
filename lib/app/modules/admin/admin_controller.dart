@@ -3,6 +3,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import '../../core/constants/flow_type_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../data/models/admin_model.dart';
 import '../../data/models/parlor_model.dart';
@@ -52,6 +53,35 @@ class AdminController extends GetxController {
   final cityController = TextEditingController();
   final RxBool isPasswordVisible = false.obs;
 
+  // Flow Type Rights state for Adding a parlor (Defaults to all enabled)
+  final RxList<String> selectedFlowRights = <String>[
+    FlowTypeConstants.walkInOrders,
+    FlowTypeConstants.advanceAppointment,
+    FlowTypeConstants.bridalOrders,
+    FlowTypeConstants.package,
+    FlowTypeConstants.homeService,
+  ].obs;
+
+  void toggleFlowRight(String flowType) {
+    if (selectedFlowRights.contains(flowType)) {
+      if (selectedFlowRights.length > 1) {
+        selectedFlowRights.remove(flowType);
+      } else {
+        _showSnackbar('Required', 'At least one flow type right must remain selected', isError: true);
+      }
+    } else {
+      selectedFlowRights.add(flowType);
+    }
+  }
+
+  void selectAllFlowRights() {
+    selectedFlowRights.assignAll(FlowTypeConstants.allFlowTypeNames);
+  }
+
+  void deselectAllFlowRights() {
+    selectedFlowRights.assignAll([FlowTypeConstants.walkInOrders]);
+  }
+
   @override
   void onInit() {
     super.onInit();
@@ -83,6 +113,7 @@ class AdminController extends GetxController {
     phoneController.clear();
     addressController.clear();
     cityController.clear();
+    selectedFlowRights.assignAll(FlowTypeConstants.allFlowTypeNames);
   }
 
   /// Initialize and ensure static admin exists in Firestore 'admin' table/collection
@@ -225,6 +256,7 @@ class AdminController extends GetxController {
         city: city,
         role: 'client',
         isActive: true,
+        allowedFlowTypes: List<String>.from(selectedFlowRights),
         createdAt: DateTime.now(),
       );
 
@@ -238,6 +270,24 @@ class AdminController extends GetxController {
       return false;
     } finally {
       isAddingParlor.value = false;
+    }
+  }
+
+  /// Update allowed flow type rights for an existing parlor
+  Future<bool> updateParlorFlowRights(String parlorId, List<String> updatedRights) async {
+    if (updatedRights.isEmpty) {
+      _showSnackbar('Warning', 'At least one flow type right must remain selected', isError: true);
+      return false;
+    }
+    try {
+      await _firestore.collection('parlors').doc(parlorId).update({
+        'allowedFlowTypes': updatedRights,
+      });
+      _showSnackbar('Success', 'Flow type permissions updated successfully!');
+      return true;
+    } catch (e) {
+      _showSnackbar('Error', 'Failed to update flow permissions: $e', isError: true);
+      return false;
     }
   }
 

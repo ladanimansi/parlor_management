@@ -1,5 +1,9 @@
+import 'dart:async';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
+import '../../core/constants/flow_type_constants.dart';
 import '../../data/models/appointment_model.dart';
 import '../../data/models/customer_model.dart';
 import '../../data/services/appointment_service.dart';
@@ -12,6 +16,7 @@ import '../../routes/app_routes.dart';
 class BookAppointmentController extends GetxController {
   final AppointmentService _appointmentService = Get.find<AppointmentService>();
   final CustomerService _customerService = Get.find<CustomerService>();
+  final GetStorage _storage = GetStorage();
 
   final formKey = GlobalKey<FormState>();
   
@@ -20,6 +25,10 @@ class BookAppointmentController extends GetxController {
   final selectedBookingType = 'Walk in orders'.obs;
   bool get isQuickBill => selectedBookingType.value == 'Walk in orders';
   final selectedAppointment = Rxn<AppointmentModel>();
+  
+  // Flow Type Rights
+  final allowedFlowTypes = <String>[].obs;
+  StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>? _parlorSubscription;
   
   // Demographic variables
   final clientAge = RxnInt();
@@ -178,6 +187,9 @@ class BookAppointmentController extends GetxController {
 
     _loadServicesFromProductMaster();
     
+    // Initialize Flow Type Rights
+    _initAllowedFlowTypes();
+
     // Check if we are in edit mode
     final args = Get.arguments;
     if (args != null && args is AppointmentModel) {
@@ -276,8 +288,12 @@ class BookAppointmentController extends GetxController {
       bookingDate.value = initialDate;
     }
     selectedCategories.assignAll(['General']);
-    selectedBookingType.value = 'Walk in orders';
-    selectedStatus.value = 'Waiting';
+    if (isFlowTypeAllowed(FlowTypeConstants.walkInOrders)) {
+      selectedBookingType.value = FlowTypeConstants.walkInOrders;
+      selectedStatus.value = 'Waiting';
+    } else {
+      _ensureValidSelectedBookingType();
+    }
   }
 
   void _prefillData(AppointmentModel appointment) {
@@ -532,5 +548,64 @@ class BookAppointmentController extends GetxController {
         'appointmentId': appointment.id,
       });
     }
+  }
+
+  bool isFlowTypeAllowed(String typeName) {
+    final userRole = _storage.read('userRole');
+    if (userRole == 'admin') return true;
+    if (allowedFlowTypes.isEmpty) return true;
+    return FlowTypeConstants.isAllowed(allowedFlowTypes, typeName);
+  }
+
+  void _initAllowedFlowTypes() {
+    final userRole = _storage.read('userRole');
+    if (userRole == 'admin') {
+      allowedFlowTypes.assignAll(FlowTypeConstants.allFlowTypeNames);
+      return;
+    }
+
+    final cached = _storage.read('allowedFlowTypes');
+    if (cached != null && cached is List && cached.isNotEmpty) {
+      allowedFlowTypes.assignAll(cached.map((e) => e.toString()).toList());
+    } else {
+      allowedFlowTypes.assignAll(FlowTypeConstants.allFlowTypeNames);
+    }
+
+    final parlorId = _appointmentService.currentParlorId;
+    if (parlorId != 'default_parlor' && parlorId.isNotEmpty) {
+      _parlorSubscription = FirebaseFirestore.instance
+          .collection('parlors')
+          .doc(parlorId)
+          .snapshots()
+          .listen((doc) {
+        if (doc.exists && doc.data() != null) {
+          final data = doc.data()!;
+          if (data['allowedFlowTypes'] != null && data['allowedFlowTypes'] is List) {
+            final rights = List<String>.from(data['allowedFlowTypes']);
+            allowedFlowTypes.assignAll(rights);
+            _storage.write('allowedFlowTypes', rights);
+            if (!isEdit.value && !isFlowTypeAllowed(selectedBookingType.value)) {
+              _ensureValidSelectedBookingType();
+            }
+          }
+        }
+      });
+    }
+  }
+
+  void _ensureValidSelectedBookingType() {
+    if (isFlowTypeAllowed(selectedBookingType.value)) return;
+    for (final flowItem in FlowTypeConstants.allFlowTypes) {
+      if (isFlowTypeAllowed(flowItem.name)) {
+        selectBookingType(flowItem.name);
+        return;
+      }
+    }
+  }
+
+  @override
+  void onClose() {
+    _parlorSubscription?.cancel();
+    super.onClose();
   }
 }

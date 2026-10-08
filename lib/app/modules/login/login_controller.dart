@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import '../../core/constants/flow_type_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../routes/app_routes.dart';
 
@@ -83,6 +84,7 @@ class LoginController extends GetxController {
           await _storage.write('isLoggedIn', true);
           await _storage.write('userEmail', email);
           await _storage.write('userRole', 'admin');
+          await _storage.write('allowedFlowTypes', FlowTypeConstants.allFlowTypeNames);
 
           Get.snackbar(
             'Welcome',
@@ -131,12 +133,17 @@ class LoginController extends GetxController {
           return;
         }
 
+        final List<String> allowedFlowTypes = parlorData['allowedFlowTypes'] != null
+            ? List<String>.from(parlorData['allowedFlowTypes'])
+            : FlowTypeConstants.allFlowTypeNames;
+
         // Save Parlor Session
         await _storage.write('isLoggedIn', true);
         await _storage.write('userEmail', email);
         await _storage.write('userRole', 'parlor');
         await _storage.write('parlorId', parlorQuery.docs.first.id);
         await _storage.write('parlorName', parlorName);
+        await _storage.write('allowedFlowTypes', allowedFlowTypes);
 
         Get.snackbar(
           'Welcome',

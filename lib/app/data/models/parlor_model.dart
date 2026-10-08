@@ -9,6 +9,7 @@ class ParlorModel {
   final String city;
   final String role;
   final bool isActive;
+  final List<String> allowedFlowTypes;
   final DateTime? createdAt;
 
   ParlorModel({
@@ -22,6 +23,13 @@ class ParlorModel {
     this.city = '',
     this.role = 'client',
     this.isActive = true,
+    this.allowedFlowTypes = const [
+      'Walk in orders',
+      'Advance appoinment',
+      'Bridal Orders',
+      'Package',
+      'Home service',
+    ],
     this.createdAt,
   });
 
@@ -37,6 +45,7 @@ class ParlorModel {
       'city': city,
       'role': role,
       'isActive': isActive,
+      'allowedFlowTypes': allowedFlowTypes,
       'createdAt': (createdAt ?? DateTime.now()).toIso8601String(),
     };
   }
@@ -53,6 +62,15 @@ class ParlorModel {
       city: map['city'] ?? '',
       role: map['role'] ?? 'client',
       isActive: map['isActive'] ?? true,
+      allowedFlowTypes: map['allowedFlowTypes'] != null
+          ? List<String>.from(map['allowedFlowTypes'])
+          : const [
+              'Walk in orders',
+              'Advance appoinment',
+              'Bridal Orders',
+              'Package',
+              'Home service',
+            ],
       createdAt: map['createdAt'] != null
           ? DateTime.tryParse(map['createdAt'].toString())
           : null,
@@ -70,6 +88,7 @@ class ParlorModel {
     String? city,
     String? role,
     bool? isActive,
+    List<String>? allowedFlowTypes,
     DateTime? createdAt,
   }) {
     return ParlorModel(
@@ -83,6 +102,7 @@ class ParlorModel {
       city: city ?? this.city,
       role: role ?? this.role,
       isActive: isActive ?? this.isActive,
+      allowedFlowTypes: allowedFlowTypes ?? this.allowedFlowTypes,
       createdAt: createdAt ?? this.createdAt,
     );
   }

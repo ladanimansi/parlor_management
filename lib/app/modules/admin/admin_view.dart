@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../core/constants/flow_type_constants.dart';
 import '../../core/theme/app_colors.dart';
 import '../../data/models/parlor_model.dart';
 import '../../routes/app_routes.dart';
@@ -187,7 +188,7 @@ class AdminView extends GetView<AdminController> {
                     itemCount: list.length,
                     separatorBuilder: (context, index) => const SizedBox(height: 10),
                     itemBuilder: (context, index) {
-                      return _buildProfessionalParlorCard(list[index]);
+                      return _buildProfessionalParlorCard(context, list[index]);
                     },
                   );
                 }),
@@ -255,7 +256,7 @@ class AdminView extends GetView<AdminController> {
     );
   }
 
-  Widget _buildProfessionalParlorCard(ParlorModel parlor) {
+  Widget _buildProfessionalParlorCard(BuildContext context, ParlorModel parlor) {
     final initials = parlor.parlorName.trim().isNotEmpty
         ? parlor.parlorName.trim().substring(0, 1).toUpperCase()
         : 'P';
@@ -360,9 +361,21 @@ class AdminView extends GetView<AdminController> {
                     onSelected: (val) {
                       if (val == 'delete') {
                         _confirmDelete(parlor);
+                      } else if (val == 'rights') {
+                        _showManageRightsDialog(context, parlor);
                       }
                     },
                     itemBuilder: (context) => [
+                      const PopupMenuItem(
+                        value: 'rights',
+                        child: Row(
+                          children: [
+                            Icon(Icons.security_outlined, size: 18, color: AppColors.primary),
+                            SizedBox(width: 8),
+                            Text('Flow Rights', style: TextStyle(color: AppColors.primary, fontSize: 13, fontWeight: FontWeight.w600)),
+                          ],
+                        ),
+                      ),
                       const PopupMenuItem(
                         value: 'delete',
                         child: Row(
@@ -414,6 +427,92 @@ class AdminView extends GetView<AdminController> {
                   overflow: TextOverflow.ellipsis,
                 ),
               ],
+
+              const SizedBox(height: 10),
+              const Divider(height: 1, color: Color(0xFFEEEEEE)),
+              const SizedBox(height: 8),
+
+              // Flow Rights Row
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  const Icon(Icons.tune_rounded, size: 14, color: AppColors.primary),
+                  const SizedBox(width: 5),
+                  const Text(
+                    'Flow Rights:',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimaryLight,
+                    ),
+                  ),
+                  const Spacer(),
+                  InkWell(
+                    onTap: () => _showManageRightsDialog(context, parlor),
+                    borderRadius: BorderRadius.circular(6),
+                    child: const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      child: Row(
+                        children: [
+                          Icon(Icons.edit_outlined, size: 12, color: AppColors.primary),
+                          SizedBox(width: 3),
+                          Text(
+                            'Edit Rights',
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Wrap(
+                spacing: 6,
+                runSpacing: 4,
+                children: FlowTypeConstants.allFlowTypes.map((flowItem) {
+                  final hasRight = FlowTypeConstants.isAllowed(parlor.allowedFlowTypes, flowItem.name);
+                  return Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: hasRight
+                          ? AppColors.primary.withValues(alpha: 0.08)
+                          : Colors.grey.shade100,
+                      borderRadius: BorderRadius.circular(6),
+                      border: Border.all(
+                        color: hasRight
+                            ? AppColors.primary.withValues(alpha: 0.3)
+                            : Colors.grey.shade200,
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          flowItem.icon,
+                          size: 11,
+                          color: hasRight ? AppColors.primary : Colors.grey.shade400,
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          flowItem.labelKey.tr,
+                          style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: hasRight ? FontWeight.w600 : FontWeight.normal,
+                            color: hasRight ? AppColors.primary : Colors.grey.shade400,
+                            decoration: hasRight ? null : TextDecoration.lineThrough,
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }).toList(),
+              ),
             ],
           ),
         ),
@@ -525,6 +624,261 @@ class AdminView extends GetView<AdminController> {
         controller.deleteParlor(parlor.id, parlor.parlorName);
         Get.back();
       },
+    );
+  }
+
+  void _showManageRightsDialog(BuildContext context, ParlorModel parlor) {
+    // Local state for dialog
+    final RxList<String> tempRights = <String>[].obs;
+    tempRights.assignAll(parlor.allowedFlowTypes);
+    final RxBool isSaving = false.obs;
+
+    Get.bottomSheet(
+      Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+        child: SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              // Drag Handle
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 14),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+
+              // Title Header
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: const Icon(Icons.security_rounded, color: AppColors.primary, size: 22),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Flow Rights: ${parlor.parlorName}',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimaryLight,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 2),
+                        const Text(
+                          'Toggle which booking flows this parlor can see & use',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textSecondaryLight,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 12),
+              const Divider(height: 1),
+              const SizedBox(height: 8),
+
+              // Select All action
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Obx(() => Text(
+                        '${tempRights.length} of ${FlowTypeConstants.allFlowTypes.length} Allowed',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.grey.shade700,
+                        ),
+                      )),
+                  TextButton(
+                    onPressed: () {
+                      if (tempRights.length == FlowTypeConstants.allFlowTypes.length) {
+                        tempRights.assignAll([FlowTypeConstants.walkInOrders]);
+                      } else {
+                        tempRights.assignAll(FlowTypeConstants.allFlowTypeNames);
+                      }
+                    },
+                    style: TextButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                      visualDensity: VisualDensity.compact,
+                    ),
+                    child: Obx(() => Text(
+                          tempRights.length == FlowTypeConstants.allFlowTypes.length
+                              ? 'Reset to Walk-in only'
+                              : 'Select All',
+                          style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600),
+                        )),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+
+              // Flow Items List
+              Flexible(
+                child: SingleChildScrollView(
+                  child: Obx(() {
+                    return Column(
+                      children: FlowTypeConstants.allFlowTypes.map((flowItem) {
+                        final isEnabled = FlowTypeConstants.isAllowed(tempRights, flowItem.name);
+
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 6),
+                          decoration: BoxDecoration(
+                            color: isEnabled
+                                ? AppColors.primary.withValues(alpha: 0.05)
+                                : const Color(0xFFF9FAFB),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: isEnabled
+                                  ? AppColors.primary.withValues(alpha: 0.3)
+                                  : Colors.grey.shade200,
+                            ),
+                          ),
+                          child: SwitchListTile(
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                            dense: true,
+                            activeTrackColor: AppColors.primary,
+                            activeThumbColor: Colors.white,
+                            value: isEnabled,
+                            onChanged: (val) {
+                              if (!val) {
+                                if (tempRights.length <= 1) {
+                                  Get.snackbar(
+                                    'Warning',
+                                    'At least one flow type right must remain enabled',
+                                    snackPosition: SnackPosition.BOTTOM,
+                                    duration: const Duration(seconds: 2),
+                                  );
+                                  return;
+                                }
+                                tempRights.removeWhere((item) =>
+                                    item.trim().toLowerCase() == flowItem.name.trim().toLowerCase() ||
+                                    (item.toLowerCase().contains('advance') && flowItem.name.toLowerCase().contains('advance')));
+                              } else {
+                                if (!FlowTypeConstants.isAllowed(tempRights, flowItem.name)) {
+                                  tempRights.add(flowItem.name);
+                                }
+                              }
+                            },
+                            secondary: Container(
+                              padding: const EdgeInsets.all(7),
+                              decoration: BoxDecoration(
+                                color: isEnabled
+                                    ? AppColors.primary.withValues(alpha: 0.12)
+                                    : Colors.grey.shade100,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Icon(
+                                flowItem.icon,
+                                size: 18,
+                                color: isEnabled ? AppColors.primary : Colors.grey.shade500,
+                              ),
+                            ),
+                            title: Text(
+                              flowItem.labelKey.tr,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: isEnabled ? AppColors.textPrimaryLight : Colors.grey.shade600,
+                              ),
+                            ),
+                            subtitle: Text(
+                              flowItem.description,
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.grey.shade500,
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    );
+                  }),
+                ),
+              ),
+              const SizedBox(height: 14),
+
+              // Action Buttons
+              Row(
+                children: [
+                  Expanded(
+                    child: OutlinedButton(
+                      onPressed: () => Get.back(),
+                      style: OutlinedButton.styleFrom(
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        side: BorderSide(color: Colors.grey.shade300),
+                      ),
+                      child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+                    ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    flex: 2,
+                    child: Obx(() => ElevatedButton(
+                          onPressed: isSaving.value
+                              ? null
+                              : () async {
+                                  isSaving.value = true;
+                                  final ok = await controller.updateParlorFlowRights(
+                                    parlor.id,
+                                    List<String>.from(tempRights),
+                                  );
+                                  isSaving.value = false;
+                                  if (ok) {
+                                    Get.back();
+                                  }
+                                },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            padding: const EdgeInsets.symmetric(vertical: 12),
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                          ),
+                          child: isSaving.value
+                              ? const SizedBox(
+                                  width: 18,
+                                  height: 18,
+                                  child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2),
+                                )
+                              : const Text(
+                                  'Save Rights',
+                                  style: TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+                                ),
+                        )),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+      isScrollControlled: true,
     );
   }
 }

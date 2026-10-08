@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../core/constants/flow_type_constants.dart';
 import '../../core/theme/app_colors.dart';
 import 'admin_controller.dart';
 
@@ -113,6 +114,96 @@ class AddParlorView extends GetView<AdminController> {
                     icon: Icons.location_on_outlined,
                     maxLines: 2,
                   ),
+                ],
+              ),
+              const SizedBox(height: 16),
+
+              // Section 3: Flow Type Permissions
+              _buildSectionCard(
+                title: 'Flow Type Rights / Permissions',
+                icon: Icons.security_rounded,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Expanded(
+                        child: Text(
+                          'Select booking flows allowed for this parlor:',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textSecondaryLight,
+                          ),
+                        ),
+                      ),
+                      TextButton(
+                        onPressed: () => controller.selectAllFlowRights(),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          visualDensity: VisualDensity.compact,
+                        ),
+                        child: const Text('Select All', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600)),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 8),
+                  Obx(() {
+                    return Column(
+                      children: FlowTypeConstants.allFlowTypes.map((flowItem) {
+                        final isChecked = controller.selectedFlowRights.contains(flowItem.name);
+                        return Container(
+                          margin: const EdgeInsets.only(bottom: 8),
+                          decoration: BoxDecoration(
+                            color: isChecked
+                                ? AppColors.primary.withValues(alpha: 0.05)
+                                : const Color(0xFFF9FAFB),
+                            borderRadius: BorderRadius.circular(10),
+                            border: Border.all(
+                              color: isChecked
+                                  ? AppColors.primary.withValues(alpha: 0.3)
+                                  : Colors.grey.shade200,
+                            ),
+                          ),
+                          child: CheckboxListTile(
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 2),
+                            dense: true,
+                            activeColor: AppColors.primary,
+                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                            value: isChecked,
+                            onChanged: (_) => controller.toggleFlowRight(flowItem.name),
+                            secondary: Container(
+                              padding: const EdgeInsets.all(7),
+                              decoration: BoxDecoration(
+                                color: isChecked
+                                    ? AppColors.primary.withValues(alpha: 0.12)
+                                    : Colors.grey.shade100,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Icon(
+                                flowItem.icon,
+                                size: 18,
+                                color: isChecked ? AppColors.primary : Colors.grey.shade600,
+                              ),
+                            ),
+                            title: Text(
+                              flowItem.labelKey.tr,
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: isChecked ? AppColors.textPrimaryLight : Colors.grey.shade700,
+                              ),
+                            ),
+                            subtitle: Text(
+                              flowItem.description,
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: Colors.grey.shade600,
+                              ),
+                            ),
+                          ),
+                        );
+                      }).toList(),
+                    );
+                  }),
                 ],
               ),
               const SizedBox(height: 24),

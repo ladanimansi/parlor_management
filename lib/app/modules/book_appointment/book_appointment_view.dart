@@ -34,7 +34,7 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
               // Booking Type Selector (Scrollable horizontally)
               Obx(() {
                 final selectedType = controller.selectedBookingType.value;
-                final types = [
+                final allTypes = [
                   {
                     'name': 'Walk in orders',
                     'key': 'walk_in_orders',
@@ -61,6 +61,14 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
                     'icon': Icons.home,
                   },
                 ];
+
+                final types = allTypes
+                    .where((type) => controller.isFlowTypeAllowed(type['name'] as String))
+                    .toList();
+
+                if (types.isEmpty) {
+                  return const SizedBox.shrink();
+                }
 
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
