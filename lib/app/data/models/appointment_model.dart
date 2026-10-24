@@ -137,30 +137,52 @@ class AppointmentModel {
     };
   }
 
+  static DateTime _parseDateTime(dynamic val) {
+    if (val == null) return DateTime.now();
+    if (val is DateTime) return val.toLocal();
+    try {
+      final dynamic d = val;
+      if (d != null && d.runtimeType.toString().contains('Timestamp')) {
+        return (d.toDate() as DateTime).toLocal();
+      }
+    } catch (_) {}
+    try {
+      final str = val.toString().trim();
+      if (str.isEmpty) return DateTime.now();
+      return DateTime.parse(str).toLocal();
+    } catch (_) {
+      return DateTime.now();
+    }
+  }
+
   factory AppointmentModel.fromMap(Map<String, dynamic> map, {String? docId}) {
     return AppointmentModel(
-      id: docId ?? map['id'] ?? '',
-      clientName: map['clientName'] ?? '',
-      mobileNumber: map['mobileNumber'] ?? '',
-      serviceName: map['serviceName'],
-      category: map['category'] ?? 'General',
-      visitingDateTime: DateTime.parse(map['visitingDateTime'] ?? map['dateTime']),
-      bookingDateTime: DateTime.parse(map['bookingDateTime'] ?? map['dateTime']),
-      status: map['status'],
-      amount: map['amount']?.toDouble() ?? 0.0,
-      notes: map['notes'],
-      referenceBy: map['referenceBy'],
-      allocatedStaffId: map['allocatedStaffId'],
-      allocatedStaffName: map['allocatedStaffName'],
-      bookingType: map['bookingType'] ?? 'Walk in orders',
+      id: docId ?? map['id']?.toString() ?? '',
+      clientName: map['clientName']?.toString() ?? '',
+      mobileNumber: map['mobileNumber']?.toString() ?? '',
+      serviceName: map['serviceName']?.toString() ?? 'General Service',
+      category: map['category']?.toString() ?? 'General',
+      visitingDateTime: _parseDateTime(map['visitingDateTime'] ?? map['dateTime']),
+      bookingDateTime: _parseDateTime(map['bookingDateTime'] ?? map['dateTime']),
+      status: map['status']?.toString() ?? 'Waiting',
+      amount: (map['amount'] is num)
+          ? (map['amount'] as num).toDouble()
+          : (double.tryParse(map['amount']?.toString() ?? '') ?? 0.0),
+      notes: map['notes']?.toString(),
+      referenceBy: map['referenceBy']?.toString(),
+      allocatedStaffId: map['allocatedStaffId']?.toString(),
+      allocatedStaffName: map['allocatedStaffName']?.toString(),
+      bookingType: map['bookingType']?.toString() ?? 'Walk in orders',
       clientAge: map['clientAge'] != null ? int.tryParse(map['clientAge'].toString()) : null,
-      clientGender: map['clientGender'],
-      clientOtherInfo: map['clientOtherInfo'],
-      selectedProducts: map['selectedProducts'],
-      paymentStatus: map['paymentStatus'] ?? 'Pending',
-      serviceAllocations: map['serviceAllocations'] != null
-          ? List<ServiceItemAllocation>.from(
-              (map['serviceAllocations'] as List).map((x) => ServiceItemAllocation.fromMap(x)))
+      clientGender: map['clientGender']?.toString(),
+      clientOtherInfo: map['clientOtherInfo']?.toString(),
+      selectedProducts: map['selectedProducts']?.toString(),
+      paymentStatus: map['paymentStatus']?.toString() ?? 'Pending',
+      serviceAllocations: map['serviceAllocations'] != null && map['serviceAllocations'] is List
+          ? (map['serviceAllocations'] as List)
+              .whereType<Map>()
+              .map((x) => ServiceItemAllocation.fromMap(Map<String, dynamic>.from(x)))
+              .toList()
           : [],
     );
   }

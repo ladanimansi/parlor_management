@@ -3,6 +3,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
+import 'package:my_parlor/app/core/theme/app_colors.dart';
 import '../../core/constants/flow_type_constants.dart';
 import '../../data/models/appointment_model.dart';
 import '../../data/models/customer_model.dart';
@@ -19,17 +20,19 @@ class BookAppointmentController extends GetxController {
   final GetStorage _storage = GetStorage();
 
   final formKey = GlobalKey<FormState>();
-  
+
   // Observables for state
   final isEdit = false.obs;
+  final isSaving = false.obs;
   final selectedBookingType = 'Walk in orders'.obs;
   bool get isQuickBill => selectedBookingType.value == 'Walk in orders';
   final selectedAppointment = Rxn<AppointmentModel>();
-  
+
   // Flow Type Rights
   final allowedFlowTypes = <String>[].obs;
-  StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>? _parlorSubscription;
-  
+  StreamSubscription<DocumentSnapshot<Map<String, dynamic>>>?
+  _parlorSubscription;
+
   // Demographic variables
   final clientAge = RxnInt();
   final clientGender = ''.obs;
@@ -39,10 +42,10 @@ class BookAppointmentController extends GetxController {
   // History variables
   final previousAppointments = <AppointmentModel>[].obs;
   final isHistoryExpanded = false.obs;
-  
+
   // Service categories from Product Master
   final availableCategories = <String>[].obs;
-  final selectedServices = <String>[].obs;  // stores selected category names
+  final selectedServices = <String>[].obs; // stores selected category names
   final serviceSearchQuery = ''.obs;
 
   // Products configuration list
@@ -52,7 +55,10 @@ class BookAppointmentController extends GetxController {
   List<String> get filteredCategories {
     if (serviceSearchQuery.value.isEmpty) return availableCategories;
     return availableCategories
-        .where((c) => c.toLowerCase().contains(serviceSearchQuery.value.toLowerCase()))
+        .where(
+          (c) =>
+              c.toLowerCase().contains(serviceSearchQuery.value.toLowerCase()),
+        )
         .toList();
   }
 
@@ -74,16 +80,16 @@ class BookAppointmentController extends GetxController {
     } else {
       serviceNameController.text = selectedServices.join(', ');
       selectedCategories.assignAll(selectedServices);
-      
+
       // Auto-calculate billing amount based on service prices
       double total = 0;
       final Set<String> newRequiredProductIds = {};
-      
+
       if (Get.isRegistered<ServicesController>()) {
         final servicesController = Get.find<ServicesController>();
         for (final serviceName in selectedServices) {
           final serviceModel = servicesController.allServices.firstWhereOrNull(
-            (s) => s.name.toLowerCase() == serviceName.toLowerCase()
+            (s) => s.name.toLowerCase() == serviceName.toLowerCase(),
           );
           if (serviceModel != null) {
             total += serviceModel.price;
@@ -114,7 +120,10 @@ class BookAppointmentController extends GetxController {
     if (Get.isRegistered<ProductCategoryController>()) {
       categoryController = Get.find<ProductCategoryController>();
     } else {
-      categoryController = Get.put(ProductCategoryController(), permanent: true);
+      categoryController = Get.put(
+        ProductCategoryController(),
+        permanent: true,
+      );
     }
 
     categoryController.addCategory(trimmed);
@@ -153,20 +162,35 @@ class BookAppointmentController extends GetxController {
   // Selected values
   final visitingDate = DateTime.now().obs;
   final visitingTime = TimeOfDay.now().obs;
-  
+
   final bookingDate = DateTime.now().obs;
   final bookingTime = TimeOfDay.now().obs;
 
   final selectedCategories = <String>[].obs;
   final selectedStatus = 'Waiting'.obs;
 
-  final categories = ['General', 'Hair', 'Skin Care', 'Makeup', 'Nail Care', 'Spa'];
-  final statuses = ['Waiting', 'Advance', 'InProgress', 'Confirm', 'Inquiry', 'Completed', 'Cancelled'];
+  final categories = [
+    'General',
+    'Hair',
+    'Skin Care',
+    'Makeup',
+    'Nail Care',
+    'Spa',
+  ];
+  final statuses = [
+    'Waiting',
+    'Advance',
+    'InProgress',
+    'Confirm',
+    'Inquiry',
+    'Completed',
+    'Cancelled',
+  ];
 
   @override
   void onInit() {
     super.onInit();
-    
+
     // Load products list from master
     try {
       if (Get.isRegistered<ProductItemController>()) {
@@ -182,11 +206,14 @@ class BookAppointmentController extends GetxController {
       final categoryController = Get.isRegistered<ProductCategoryController>()
           ? Get.find<ProductCategoryController>()
           : Get.put(ProductCategoryController(), permanent: true);
-      ever(categoryController.categories, (_) => _loadServicesFromProductMaster());
+      ever(
+        categoryController.categories,
+        (_) => _loadServicesFromProductMaster(),
+      );
     } catch (_) {}
 
     _loadServicesFromProductMaster();
-    
+
     // Initialize Flow Type Rights
     _initAllowedFlowTypes();
 
@@ -221,7 +248,8 @@ class BookAppointmentController extends GetxController {
     final matches = _appointmentService.allAppointments.where((app) {
       final appMobileClean = app.mobileNumber.replaceAll(RegExp(r'\D'), '');
       final isSameMobile = appMobileClean == cleanMobile;
-      final isDifferentId = !isEdit.value || app.id != selectedAppointment.value?.id;
+      final isDifferentId =
+          !isEdit.value || app.id != selectedAppointment.value?.id;
       return isSameMobile && isDifferentId;
     }).toList();
 
@@ -252,7 +280,8 @@ class BookAppointmentController extends GetxController {
       } else if (matches.isNotEmpty) {
         isNewCustomer.value = false;
         final latest = matches.first;
-        if (clientNameController.text.trim().isEmpty || clientNameController.text == 'walkin_client'.tr) {
+        if (clientNameController.text.trim().isEmpty ||
+            clientNameController.text == 'walkin_client'.tr) {
           clientNameController.text = latest.clientName;
         }
         clientAge.value = latest.clientAge;
@@ -283,9 +312,10 @@ class BookAppointmentController extends GetxController {
     amountController = TextEditingController(text: '0');
     notesController = TextEditingController();
     referenceByController = TextEditingController();
-    
+
     if (initialDate != null) {
       bookingDate.value = initialDate;
+      visitingDate.value = initialDate;
     }
     selectedCategories.assignAll(['General']);
     if (isFlowTypeAllowed(FlowTypeConstants.walkInOrders)) {
@@ -298,15 +328,23 @@ class BookAppointmentController extends GetxController {
 
   void _prefillData(AppointmentModel appointment) {
     clientNameController = TextEditingController(text: appointment.clientName);
-    mobileNumberController = TextEditingController(text: appointment.mobileNumber);
-    serviceNameController = TextEditingController(text: appointment.serviceName);
-    amountController = TextEditingController(text: appointment.amount.toStringAsFixed(0));
+    mobileNumberController = TextEditingController(
+      text: appointment.mobileNumber,
+    );
+    serviceNameController = TextEditingController(
+      text: appointment.serviceName,
+    );
+    amountController = TextEditingController(
+      text: appointment.amount.toStringAsFixed(0),
+    );
     notesController = TextEditingController(text: appointment.notes ?? "");
-    referenceByController = TextEditingController(text: appointment.referenceBy ?? "");
-    
+    referenceByController = TextEditingController(
+      text: appointment.referenceBy ?? "",
+    );
+
     visitingDate.value = appointment.visitingDateTime;
     visitingTime.value = TimeOfDay.fromDateTime(appointment.visitingDateTime);
-    
+
     bookingDate.value = appointment.bookingDateTime;
     bookingTime.value = TimeOfDay.fromDateTime(appointment.bookingDateTime);
 
@@ -319,16 +357,25 @@ class BookAppointmentController extends GetxController {
     clientOtherInfo.value = appointment.clientOtherInfo ?? '';
 
     // Restore selected services
-    final names = appointment.serviceName.split(',').map((e) => e.trim()).where((e) => e.isNotEmpty).toList();
+    final names = appointment.serviceName
+        .split(',')
+        .map((e) => e.trim())
+        .where((e) => e.isNotEmpty)
+        .toList();
     selectedServices.assignAll(names);
     selectedCategories.assignAll(names);
 
     // Restore selected products
     selectedProductIds.clear();
     if (appointment.selectedProducts != null) {
-      final prodNames = appointment.selectedProducts!.split(',').map((e) => e.trim()).toList();
+      final prodNames = appointment.selectedProducts!
+          .split(',')
+          .map((e) => e.trim())
+          .toList();
       for (final prodName in prodNames) {
-        final prod = availableProducts.firstWhereOrNull((p) => p['name'] == prodName);
+        final prod = availableProducts.firstWhereOrNull(
+          (p) => p['name'] == prodName,
+        );
         if (prod != null) {
           selectedProductIds.add(prod['id'].toString());
         }
@@ -353,20 +400,33 @@ class BookAppointmentController extends GetxController {
     final now = DateTime.now();
     final today = DateTime(now.year, now.month, now.day);
     final selectedDay = DateTime(date.year, date.month, date.day);
-    if (selectedDay.isAfter(today) || selectedBookingType.value != 'Walk in orders') {
+    if (selectedDay.isAfter(today) ||
+        selectedBookingType.value != 'Walk in orders') {
       if (selectedStatus.value == 'Waiting') {
         selectedStatus.value = 'Advance';
       }
-    } else if (selectedDay.isAtSameMomentAs(today) && selectedBookingType.value == 'Walk in orders') {
+    } else if (selectedDay.isAtSameMomentAs(today) &&
+        selectedBookingType.value == 'Walk in orders') {
       if (selectedStatus.value == 'Advance') {
         selectedStatus.value = 'Waiting';
       }
     }
   }
-  void updateVisitingTime(TimeOfDay time) => visitingTime.value = time;
-  
-  void updateBookingDate(DateTime date) => bookingDate.value = date;
-  void updateBookingTime(TimeOfDay time) => bookingTime.value = time;
+
+  void updateVisitingTime(TimeOfDay time) {
+    visitingTime.value = time;
+    bookingTime.value = time;
+  }
+
+  void updateBookingDate(DateTime date) {
+    bookingDate.value = date;
+    visitingDate.value = date;
+  }
+
+  void updateBookingTime(TimeOfDay time) {
+    bookingTime.value = time;
+    visitingTime.value = time;
+  }
 
   void toggleCategory(String category) {
     if (selectedCategories.contains(category)) {
@@ -375,16 +435,20 @@ class BookAppointmentController extends GetxController {
       selectedCategories.add(category);
     }
   }
-  
+
   bool isStaffAllocated() {
     final app = selectedAppointment.value;
     if (app == null) return false;
-    final bool hasOrderStaff = app.allocatedStaffId != null && app.allocatedStaffId!.isNotEmpty;
-    final bool hasServiceStaff = app.serviceAllocations.isNotEmpty &&
-        app.serviceAllocations.any((sa) => sa.staffId != null && sa.staffId!.isNotEmpty);
+    final bool hasOrderStaff =
+        app.allocatedStaffId != null && app.allocatedStaffId!.isNotEmpty;
+    final bool hasServiceStaff =
+        app.serviceAllocations.isNotEmpty &&
+        app.serviceAllocations.any(
+          (sa) => sa.staffId != null && sa.staffId!.isNotEmpty,
+        );
     return hasOrderStaff || hasServiceStaff;
   }
-  
+
   void updateStatus(String status) {
     if (status == 'InProgress' && !isStaffAllocated()) {
       Get.snackbar(
@@ -413,141 +477,240 @@ class BookAppointmentController extends GetxController {
     }
   }
 
-  void saveAppointment({bool goToPreparation = false, bool goToAllocation = false}) {
-    if (!formKey.currentState!.validate()) return;
+  Future<void> saveAppointment({
+    bool goToPreparation = false,
+    bool goToAllocation = false,
+  }) async {
+    // Prevent double submissions while saving is in progress
+    if (isSaving.value) return;
 
-    if (selectedStatus.value == 'InProgress' && !isStaffAllocated()) {
-      selectedStatus.value = 'Waiting';
+    // 1. Validate Service Selection
+    if (selectedServices.isEmpty) {
       Get.snackbar(
-        "Status Defaulted to Waiting",
-        "Order status defaulted to 'Waiting' because staff has not been allocated yet.",
+        "Service Required",
+        "Please select at least one service before saving the order.",
         snackPosition: SnackPosition.BOTTOM,
-        duration: const Duration(seconds: 3),
+        backgroundColor: Colors.red.shade100,
+        colorText: Colors.red.shade900,
+        margin: const EdgeInsets.all(12),
+        duration: const Duration(seconds: 4),
       );
+      return;
     }
 
-    DateTime finalVisitingDateTime;
-    DateTime finalBookingDateTime;
-    String status;
-    String? notes;
-    String? referenceBy;
-
-    if (isQuickBill) {
-      finalVisitingDateTime = DateTime.now();
-      finalBookingDateTime = DateTime.now();
-      status = selectedStatus.value;
-      notes = notesController.text.trim().isEmpty ? null : notesController.text.trim();
-      referenceBy = null;
-    } else {
-      finalVisitingDateTime = DateTime(
-        visitingDate.value.year,
-        visitingDate.value.month,
-        visitingDate.value.day,
-        visitingTime.value.hour,
-        visitingTime.value.minute,
+    // 2. Validate Form Fields (Client Name, Mobile Number)
+    if (formKey.currentState != null && !formKey.currentState!.validate()) {
+      Get.snackbar(
+        "Validation Required",
+        "Please fill in the required fields (Client Name / Mobile) before saving.",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.shade100,
+        colorText: Colors.red.shade900,
+        margin: const EdgeInsets.all(12),
+        duration: const Duration(seconds: 4),
       );
+      return;
+    }
 
-      finalBookingDateTime = DateTime(
+    try {
+      isSaving.value = true;
+
+      if (selectedStatus.value == 'InProgress' && !isStaffAllocated()) {
+        selectedStatus.value = 'Waiting';
+        Get.snackbar(
+          "Status Defaulted to Waiting",
+          "Order status defaulted to 'Waiting' because staff has not been allocated yet.",
+          snackPosition: SnackPosition.BOTTOM,
+          duration: const Duration(seconds: 3),
+        );
+      }
+
+      DateTime finalVisitingDateTime;
+      DateTime finalBookingDateTime;
+      String status;
+      String? notes;
+      String? referenceBy;
+
+      final targetDateTime = DateTime(
         bookingDate.value.year,
         bookingDate.value.month,
         bookingDate.value.day,
         bookingTime.value.hour,
         bookingTime.value.minute,
       );
-      status = selectedStatus.value == 'Waiting' ? 'Advance' : selectedStatus.value;
-      notes = notesController.text.isEmpty ? null : notesController.text;
-      referenceBy = referenceByController.text.isEmpty ? null : referenceByController.text;
-    }
+      finalVisitingDateTime = targetDateTime;
+      finalBookingDateTime = targetDateTime;
 
-    final clientName = clientNameController.text.trim().isEmpty
-        ? 'walkin_client'.tr
-        : clientNameController.text.trim();
+      if (isQuickBill) {
+        status = selectedStatus.value;
+        notes = notesController.text.trim().isEmpty
+            ? null
+            : notesController.text.trim();
+        referenceBy = null;
+      } else {
+        status = selectedStatus.value == 'Waiting'
+            ? 'Advance'
+            : selectedStatus.value;
+        notes = notesController.text.trim().isEmpty
+            ? null
+            : notesController.text.trim();
+        referenceBy = referenceByController.text.trim().isEmpty
+            ? null
+            : referenceByController.text.trim();
+      }
 
-    final serviceName = serviceNameController.text.trim().isEmpty
-        ? (selectedServices.isNotEmpty ? selectedServices.join(', ') : 'General Service')
-        : serviceNameController.text.trim();
+      final clientName = clientNameController.text.trim().isEmpty
+          ? 'walkin_client'.tr
+          : clientNameController.text.trim();
 
-    // Register / Update Customer Profile
-    final cleanMobile = mobileNumberController.text.trim();
-    if (cleanMobile.isNotEmpty) {
-      final existingCust = _customerService.getCustomerByMobile(cleanMobile);
-      final customer = CustomerModel(
-        id: existingCust?.id ?? 'c_${DateTime.now().millisecondsSinceEpoch}',
-        name: clientName,
+      final serviceName = serviceNameController.text.trim().isEmpty
+          ? (selectedServices.isNotEmpty
+                ? selectedServices.join(', ')
+                : 'General Service')
+          : serviceNameController.text.trim();
+
+      // Register / Update Customer Profile in Firestore (parlors/{parlorId}/customers)
+      final cleanMobile = mobileNumberController.text.trim();
+      if (cleanMobile.isNotEmpty) {
+        final existingCust = _customerService.getCustomerByMobile(cleanMobile);
+        final customer = CustomerModel(
+          id: existingCust?.id ?? 'c_${DateTime.now().millisecondsSinceEpoch}',
+          name: clientName,
+          mobileNumber: cleanMobile,
+          age: clientAge.value,
+          gender: clientGender.value.isEmpty ? null : clientGender.value,
+          otherInfo: clientOtherInfo.value.isEmpty
+              ? null
+              : clientOtherInfo.value,
+        );
+        await _customerService.registerCustomer(customer);
+      }
+
+      // Build service-wise allocations safely
+      final List<ServiceItemAllocation> allocations = [];
+      ServicesController? servicesController;
+      if (Get.isRegistered<ServicesController>()) {
+        servicesController = Get.find<ServicesController>();
+      }
+
+      final double totalAmount = double.tryParse(amountController.text) ?? 0.0;
+      final double serviceUnitPrice = selectedServices.isNotEmpty
+          ? (totalAmount / selectedServices.length)
+          : 0.0;
+
+      for (int i = 0; i < selectedServices.length; i++) {
+        final sName = selectedServices[i];
+        final serviceModel = servicesController?.allServices.firstWhereOrNull(
+          (s) => s.name.toLowerCase() == sName.toLowerCase(),
+        );
+        allocations.add(
+          ServiceItemAllocation(
+            serviceId:
+                serviceModel?.id ??
+                's_alloc_${DateTime.now().millisecondsSinceEpoch}_$i',
+            serviceName: serviceModel?.name ?? sName,
+            price: serviceModel?.price ?? serviceUnitPrice,
+            status: 'Waiting',
+          ),
+        );
+      }
+
+      final prodNames = selectedProductIds.isNotEmpty
+          ? availableProducts
+                .where((p) => selectedProductIds.contains(p['id']))
+                .map((p) => p['name'])
+                .join(', ')
+          : null;
+
+      final appointmentId = isEdit.value && selectedAppointment.value != null
+          ? selectedAppointment.value!.id
+          : DateTime.now().millisecondsSinceEpoch.toString();
+
+      final appointment = AppointmentModel(
+        id: appointmentId,
+        clientName: clientName,
         mobileNumber: cleanMobile,
-        age: clientAge.value,
-        gender: clientGender.value.isEmpty ? null : clientGender.value,
-        otherInfo: clientOtherInfo.value.isEmpty ? null : clientOtherInfo.value,
+        serviceName: serviceName,
+        category: selectedCategories.isEmpty
+            ? 'General'
+            : selectedCategories.join(', '),
+        visitingDateTime: finalVisitingDateTime,
+        bookingDateTime: finalBookingDateTime,
+        status: status,
+        amount: totalAmount,
+        notes: notes,
+        referenceBy: referenceBy,
+        allocatedStaffId: isEdit.value
+            ? selectedAppointment.value?.allocatedStaffId
+            : null,
+        allocatedStaffName: isEdit.value
+            ? selectedAppointment.value?.allocatedStaffName
+            : null,
+        bookingType: selectedBookingType.value,
+        clientAge: clientAge.value,
+        clientGender: clientGender.value,
+        clientOtherInfo: clientOtherInfo.value,
+        selectedProducts: prodNames,
+        paymentStatus: isEdit.value && selectedAppointment.value != null
+            ? selectedAppointment.value!.paymentStatus
+            : 'Pending',
+        serviceAllocations: allocations,
       );
-      _customerService.registerCustomer(customer);
-    }
 
-    // Build service-wise allocations
-    final List<ServiceItemAllocation> allocations = [];
-    final servicesController = Get.find<ServicesController>();
-    for (int i = 0; i < selectedServices.length; i++) {
-      final sName = selectedServices[i];
-      final serviceModel = servicesController.allServices.firstWhereOrNull(
-        (s) => s.name.toLowerCase() == sName.toLowerCase(),
+      // Save to Firebase (parlors/{parlorId}/appointments/{id})
+      if (isEdit.value) {
+        await _appointmentService.updateAppointment(appointment);
+      } else {
+        await _appointmentService.addAppointment(appointment);
+      }
+
+      // Redirect to target page
+      if (goToPreparation) {
+        final initialCategory = selectedCategories.isNotEmpty
+            ? selectedCategories.first
+            : 'All';
+        Get.offNamed(
+          Routes.ORDER_PREPARATION,
+          arguments: {
+            'category': initialCategory,
+            'appointmentId': appointment.id,
+          },
+        );
+      } else if (goToAllocation) {
+        Get.offNamed(
+          Routes.ORDER_ALLOCATION,
+          arguments: {'appointmentId': appointment.id},
+        );
+      } else {
+        // Redirect to Order List page (OrdersView)
+        Get.offNamed(Routes.ORDERS);
+      }
+
+      // Display success snackbar on the redirected page
+      Get.snackbar(
+        "Order Saved",
+        isEdit.value
+            ? "Order for ${appointment.clientName} updated successfully!"
+            : "Order for ${appointment.clientName} saved successfully!",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: AppColors.success.withValues(alpha: 0.18),
+        colorText: AppColors.success,
+        icon: const Icon(Icons.check_circle_outline, color: AppColors.success),
+        margin: const EdgeInsets.all(12),
+        duration: const Duration(seconds: 3),
       );
-      allocations.add(ServiceItemAllocation(
-        serviceId: serviceModel?.id ?? 's_alloc_${DateTime.now().millisecondsSinceEpoch}_$i',
-        serviceName: serviceModel?.name ?? sName,
-        price: serviceModel?.price ?? ((double.tryParse(amountController.text) ?? 0.0) / (selectedServices.isEmpty ? 1 : selectedServices.length)),
-        status: 'Waiting',
-      ));
-    }
-
-    final prodNames = selectedProductIds.isNotEmpty
-        ? availableProducts
-            .where((p) => selectedProductIds.contains(p['id']))
-            .map((p) => p['name'])
-            .join(', ')
-        : null;
-
-    final appointment = AppointmentModel(
-      id: isEdit.value ? selectedAppointment.value!.id : DateTime.now().millisecondsSinceEpoch.toString(),
-      clientName: clientName,
-      mobileNumber: mobileNumberController.text,
-      serviceName: serviceName,
-      category: selectedCategories.isEmpty ? 'General' : selectedCategories.join(', '),
-      visitingDateTime: finalVisitingDateTime,
-      bookingDateTime: finalBookingDateTime,
-      status: status,
-      amount: double.tryParse(amountController.text) ?? 0.0,
-      notes: notes,
-      referenceBy: referenceBy,
-      allocatedStaffId: isEdit.value ? selectedAppointment.value!.allocatedStaffId : null,
-      allocatedStaffName: isEdit.value ? selectedAppointment.value!.allocatedStaffName : null,
-      bookingType: selectedBookingType.value,
-      clientAge: clientAge.value,
-      clientGender: clientGender.value,
-      clientOtherInfo: clientOtherInfo.value,
-      selectedProducts: prodNames,
-      paymentStatus: isEdit.value ? selectedAppointment.value!.paymentStatus : 'Pending',
-      serviceAllocations: allocations,
-    );
-
-    if (isEdit.value) {
-      _appointmentService.updateAppointment(appointment);
-      Get.back();
-      Get.snackbar("success".tr, "appointment_updated".tr);
-    } else {
-      _appointmentService.addAppointment(appointment);
-      Get.back();
-      Get.snackbar("success".tr, "appointment_booked".tr);
-    }
-
-    if (goToPreparation) {
-      final initialCategory = selectedCategories.isNotEmpty ? selectedCategories.first : 'All';
-      Get.toNamed(Routes.ORDER_PREPARATION, arguments: {
-        'category': initialCategory,
-        'appointmentId': appointment.id,
-      });
-    } else if (goToAllocation) {
-      Get.toNamed(Routes.ORDER_ALLOCATION, arguments: {
-        'appointmentId': appointment.id,
-      });
+    } catch (e) {
+      Get.snackbar(
+        "Save Failed",
+        "An unexpected error occurred while saving: $e",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.shade100,
+        colorText: Colors.red.shade900,
+        margin: const EdgeInsets.all(12),
+        duration: const Duration(seconds: 5),
+      );
+    } finally {
+      isSaving.value = false;
     }
   }
 
@@ -579,18 +742,20 @@ class BookAppointmentController extends GetxController {
           .doc(parlorId)
           .snapshots()
           .listen((doc) {
-        if (doc.exists && doc.data() != null) {
-          final data = doc.data()!;
-          if (data['allowedFlowTypes'] != null && data['allowedFlowTypes'] is List) {
-            final rights = List<String>.from(data['allowedFlowTypes']);
-            allowedFlowTypes.assignAll(rights);
-            _storage.write('allowedFlowTypes', rights);
-            if (!isEdit.value && !isFlowTypeAllowed(selectedBookingType.value)) {
-              _ensureValidSelectedBookingType();
+            if (doc.exists && doc.data() != null) {
+              final data = doc.data()!;
+              if (data['allowedFlowTypes'] != null &&
+                  data['allowedFlowTypes'] is List) {
+                final rights = List<String>.from(data['allowedFlowTypes']);
+                allowedFlowTypes.assignAll(rights);
+                _storage.write('allowedFlowTypes', rights);
+                if (!isEdit.value &&
+                    !isFlowTypeAllowed(selectedBookingType.value)) {
+                  _ensureValidSelectedBookingType();
+                }
+              }
             }
-          }
-        }
-      });
+          });
     }
   }
 
@@ -603,5 +768,4 @@ class BookAppointmentController extends GetxController {
       }
     }
   }
-
 }

@@ -23,8 +23,10 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
           onPressed: () => Get.back(),
         ),
       ),
-      body: Form(
-        key: controller.formKey,
+      body: Stack(
+        children: [
+          Form(
+            key: controller.formKey,
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
           child: Column(
@@ -582,31 +584,28 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
                 );
               }),
 
-              // Order Details (Only visible in Pre-Booking mode)
-              Obx(() {
-                if (controller.isQuickBill) return const SizedBox.shrink();
-                return Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 25),
-                    _buildSectionTitle("order_details".tr),
-                    CustomCard(
-                      child: Column(
-                        children: [
-                          _buildDateTimePicker(
-                            context,
-                            title: "order_date_time".tr,
-                            dateObs: controller.bookingDate,
-                            timeObs: controller.bookingTime,
-                            onDateChanged: controller.updateBookingDate,
-                            onTimeChanged: controller.updateBookingTime,
-                          ),
-                        ],
-                      ),
+              // Order Details (Date & Time)
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: 25),
+                  _buildSectionTitle("order_details".tr),
+                  CustomCard(
+                    child: Column(
+                      children: [
+                        _buildDateTimePicker(
+                          context,
+                          title: "order_date_time".tr,
+                          dateObs: controller.bookingDate,
+                          timeObs: controller.bookingTime,
+                          onDateChanged: controller.updateBookingDate,
+                          onTimeChanged: controller.updateBookingTime,
+                        ),
+                      ],
                     ),
-                  ],
-                );
-              }),
+                  ),
+                ],
+              ),
 
               const SizedBox(height: 25),
               _buildSectionTitle("service_details".tr),
@@ -839,56 +838,116 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
               //   ],
               // ),
               const SizedBox(height: 40),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: controller.saveAppointment,
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 18),
-                    backgroundColor: AppColors.primary,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
+              Obx(() {
+                final isSaving = controller.isSaving.value;
+                return SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: isSaving ? null : () => controller.saveAppointment(),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      backgroundColor: AppColors.primary,
+                      disabledBackgroundColor: AppColors.primary.withValues(alpha: 0.6),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
                     ),
+                    child: isSaving
+                        ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2.4,
+                            ),
+                          )
+                        : Text(
+                            "save_order".tr,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
-                  child: Text(
-                    "save_order".tr,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
+                );
+              }),
               const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () =>
-                      controller.saveAppointment(goToPreparation: true),
-                  style: ElevatedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(vertical: 18),
-                    backgroundColor: AppColors.secondary,
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
+              Obx(() {
+                final isSaving = controller.isSaving.value;
+                return SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: isSaving
+                        ? null
+                        : () => controller.saveAppointment(goToPreparation: true),
+                    style: ElevatedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(vertical: 16),
+                      backgroundColor: AppColors.secondary,
+                      disabledBackgroundColor: AppColors.secondary.withValues(alpha: 0.6),
+                      foregroundColor: Colors.white,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(15),
+                      ),
                     ),
+                    child: isSaving
+                        ? const SizedBox(
+                            width: 22,
+                            height: 22,
+                            child: CircularProgressIndicator(
+                              color: Colors.white,
+                              strokeWidth: 2.4,
+                            ),
+                          )
+                        : Text(
+                            "save_and_preparation".tr,
+                            style: const TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                   ),
-                  child: Text(
-                    "save_and_preparation".tr,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
+                );
+              }),
               const SizedBox(height: 20),
             ],
           ),
         ),
       ),
-    );
+      // Full screen saving overlay
+      Obx(() {
+        if (!controller.isSaving.value) return const SizedBox.shrink();
+        return Container(
+          color: Colors.black.withValues(alpha: 0.35),
+          child: Center(
+            child: Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.15),
+                    blurRadius: 18,
+                    offset: const Offset(0, 4),
+                  ),
+                ],
+              ),
+              child: const SizedBox(
+                width: 32,
+                height: 32,
+                child: CircularProgressIndicator(
+                  color: AppColors.primary,
+                  strokeWidth: 3.0,
+                ),
+              ),
+            ),
+          ),
+        );
+      }),
+    ],
+  ),
+);
   }
 
 

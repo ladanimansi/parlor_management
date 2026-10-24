@@ -80,7 +80,10 @@ class DashboardView extends GetView<DashboardController> {
       ),
       floatingActionButton: FloatingActionButton(
         heroTag: "dashboard_fab",
-        onPressed: () => Get.toNamed(Routes.BOOK_APPOINTMENT, arguments: controller.selectedDay.value),
+        onPressed: () async {
+          await Get.toNamed(Routes.BOOK_APPOINTMENT, arguments: controller.selectedDay.value);
+          controller.filterAppointments();
+        },
         backgroundColor: AppColors.primary,
         child: const Icon(Icons.add, color: Colors.white),
       ),
@@ -143,7 +146,10 @@ class DashboardView extends GetView<DashboardController> {
           return Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: CustomCard(
-              onTap: () => Get.toNamed(Routes.BOOK_APPOINTMENT, arguments: appointment),
+              onTap: () async {
+                await Get.toNamed(Routes.BOOK_APPOINTMENT, arguments: appointment);
+                controller.filterAppointments();
+              },
               child: Row(
                 children: [
                   Column(

@@ -51,9 +51,17 @@ class AppointmentService extends GetxService {
           .snapshots()
           .listen(
         (snapshot) {
-          allAppointments.assignAll(snapshot.docs.map((doc) {
-            return AppointmentModel.fromMap(doc.data(), docId: doc.id);
-          }).toList());
+          final list = <AppointmentModel>[];
+          for (final doc in snapshot.docs) {
+            try {
+              list.add(AppointmentModel.fromMap(doc.data(), docId: doc.id));
+            } catch (e) {
+              if (kDebugMode) {
+                print('Firestore: Skipping corrupted appointment ${doc.id}: $e');
+              }
+            }
+          }
+          allAppointments.assignAll(list);
         },
         onError: (err) {
           if (kDebugMode) {

@@ -12,16 +12,22 @@ import '../product_item/product_item_controller.dart';
 class HomeBinding extends Bindings {
   @override
   void dependencies() {
-    // Services first
-    Get.put(AppointmentService());
-    Get.put(StaffService());
-    Get.put(CustomerService());
+    // Core Services must be permanent so real-time streams and state survive screen navigation
+    if (!Get.isRegistered<AppointmentService>()) {
+      Get.put(AppointmentService(), permanent: true);
+    }
+    if (!Get.isRegistered<StaffService>()) {
+      Get.put(StaffService(), permanent: true);
+    }
+    if (!Get.isRegistered<CustomerService>()) {
+      Get.put(CustomerService(), permanent: true);
+    }
 
     // Controllers
-    Get.lazyPut<HomeController>(() => HomeController());
-    Get.lazyPut<DashboardController>(() => DashboardController());
-    Get.lazyPut<ServicesController>(() => ServicesController());
-    Get.lazyPut<MenuController>(() => MenuController());
+    Get.lazyPut<HomeController>(() => HomeController(), fenix: true);
+    Get.lazyPut<DashboardController>(() => DashboardController(), fenix: true);
+    Get.lazyPut<ServicesController>(() => ServicesController(), fenix: true);
+    Get.lazyPut<MenuController>(() => MenuController(), fenix: true);
     Get.put(ProductCategoryController(), permanent: true);
     Get.put(ProductItemController(), permanent: true);
   }

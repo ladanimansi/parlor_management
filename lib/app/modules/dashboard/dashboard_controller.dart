@@ -17,17 +17,32 @@ class DashboardController extends GetxController {
   @override
   void onInit() {
     super.onInit();
+    // Ensure stream is actively bound
+    _appointmentService.bindAppointmentsStream();
     // Listen to changes in all appointments to update daily view
     ever(_appointmentService.allAppointments, (_) => _filterAppointments());
+    _filterAppointments();
+  }
+
+  @override
+  void onReady() {
+    super.onReady();
     _filterAppointments();
   }
 
   void _filterAppointments() {
     dailyAppointments.assignAll(
       _appointmentService.allAppointments
-          .where((app) => isSameDay(app.bookingDateTime, selectedDay.value))
+          .where((app) =>
+              isSameDay(app.bookingDateTime, selectedDay.value) ||
+              isSameDay(app.visitingDateTime, selectedDay.value))
           .toList(),
     );
+  }
+
+  /// Public method to refresh filter when screen or tab changes
+  void filterAppointments() {
+    _filterAppointments();
   }
 
   void onDaySelected(DateTime selected, DateTime focused) {
