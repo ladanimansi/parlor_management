@@ -13,7 +13,10 @@ class LoginView extends GetView<LoginController> {
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 28.0, vertical: 24.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 28.0,
+              vertical: 24.0,
+            ),
             child: ConstrainedBox(
               constraints: const BoxConstraints(maxWidth: 420),
               child: Column(
@@ -94,7 +97,9 @@ class LoginView extends GetView<LoginController> {
                           hintText: 'Enter your email',
                           hintStyle: TextStyle(
                             fontSize: 14,
-                            color: AppColors.textSecondaryLight.withValues(alpha: 0.7),
+                            color: AppColors.textSecondaryLight.withValues(
+                              alpha: 0.7,
+                            ),
                           ),
                           prefixIcon: const Icon(
                             Icons.email_outlined,
@@ -145,94 +150,64 @@ class LoginView extends GetView<LoginController> {
                         ),
                       ),
                       const SizedBox(height: 8),
-                      Obx(() => TextField(
-                            controller: controller.passwordController,
-                            obscureText: !controller.isPasswordVisible.value,
-                            decoration: InputDecoration(
-                              hintText: 'Enter your password',
-                              hintStyle: TextStyle(
-                                fontSize: 14,
-                                color: AppColors.textSecondaryLight
-                                    .withValues(alpha: 0.7),
-                              ),
-                              prefixIcon: const Icon(
-                                Icons.lock_outline,
-                                color: AppColors.primary,
-                                size: 20,
-                              ),
-                              suffixIcon: IconButton(
-                                icon: Icon(
-                                  controller.isPasswordVisible.value
-                                      ? Icons.visibility_outlined
-                                      : Icons.visibility_off_outlined,
-                                  color: AppColors.textSecondaryLight,
-                                  size: 20,
-                                ),
-                                onPressed: controller.togglePasswordVisibility,
-                              ),
-                              filled: true,
-                              fillColor: Colors.white,
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16,
-                                vertical: 14,
-                              ),
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(
-                                  color: AppColors.primary.withValues(alpha: 0.2),
-                                ),
-                              ),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: BorderSide(
-                                  color: AppColors.primary.withValues(alpha: 0.2),
-                                ),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(12),
-                                borderSide: const BorderSide(
-                                  color: AppColors.primary,
-                                  width: 1.5,
-                                ),
+                      Obx(
+                        () => TextField(
+                          controller: controller.passwordController,
+                          obscureText: !controller.isPasswordVisible.value,
+                          decoration: InputDecoration(
+                            hintText: 'Enter your password',
+                            hintStyle: TextStyle(
+                              fontSize: 14,
+                              color: AppColors.textSecondaryLight.withValues(
+                                alpha: 0.7,
                               ),
                             ),
-                          )),
-                    ],
-                  ),
-                  const SizedBox(height: 14),
-
-                  // Hint note for static admin
-                  Container(
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.08),
-                      borderRadius: BorderRadius.circular(10),
-                      border: Border.all(
-                        color: AppColors.primary.withValues(alpha: 0.2),
-                      ),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Icon(
-                          Icons.info_outline,
-                          size: 16,
-                          color: AppColors.primary,
-                        ),
-                        const SizedBox(width: 8),
-                        Expanded(
-                          child: Text(
-                            'Admin login: ${LoginController.adminEmail}',
-                            style: const TextStyle(
-                              fontSize: 12,
-                              color: AppColors.textPrimaryLight,
-                              fontWeight: FontWeight.w500,
+                            prefixIcon: const Icon(
+                              Icons.lock_outline,
+                              color: AppColors.primary,
+                              size: 20,
+                            ),
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                controller.isPasswordVisible.value
+                                    ? Icons.visibility_outlined
+                                    : Icons.visibility_off_outlined,
+                                color: AppColors.textSecondaryLight,
+                                size: 20,
+                              ),
+                              onPressed: controller.togglePasswordVisibility,
+                            ),
+                            filled: true,
+                            fillColor: Colors.white,
+                            contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 14,
+                            ),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(
+                                color: AppColors.primary.withValues(alpha: 0.2),
+                              ),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(
+                                color: AppColors.primary.withValues(alpha: 0.2),
+                              ),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: const BorderSide(
+                                color: AppColors.primary,
+                                width: 1.5,
+                              ),
                             ),
                           ),
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
+
                   const SizedBox(height: 28),
 
                   // Login Button

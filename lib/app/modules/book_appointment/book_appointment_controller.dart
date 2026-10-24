@@ -338,6 +338,7 @@ class BookAppointmentController extends GetxController {
 
   @override
   void onClose() {
+    _parlorSubscription?.cancel();
     clientNameController.dispose();
     mobileNumberController.dispose();
     serviceNameController.dispose();
@@ -603,9 +604,4 @@ class BookAppointmentController extends GetxController {
     }
   }
 
-  @override
-  void onClose() {
-    _parlorSubscription?.cancel();
-    super.onClose();
-  }
 }
