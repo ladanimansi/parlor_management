@@ -97,4 +97,7 @@ final Map<String, String> hi = {
   'no_staff_available': 'कोई स्टाफ सदस्य उपलब्ध नहीं है',
   'allocated_successfully': 'सफलतापूर्वक आवंटित किया गया',
   'allocation_cleared_successfully': 'स्टाफ आवंटन सफलतापूर्वक हटा दिया गया',
+  'logout': 'लॉगआउट',
+  'confirm_logout': 'क्या आप वाकई लॉगआउट करना चाहते हैं?',
+  'account': 'खाता',
 };

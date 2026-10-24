@@ -97,4 +97,7 @@ final Map<String, String> gu = {
   'no_staff_available': 'કોઈ સ્ટાફ સભ્ય ઉપલબ્ધ નથી',
   'allocated_successfully': 'સફળતાપૂર્વક ફાળવવામાં આવ્યો',
   'allocation_cleared_successfully': 'સ્ટાફ ફાળવણી સફળતાપૂર્વક દૂર કરવામાં આવી',
+  'logout': 'લૉગઆઉટ',
+  'confirm_logout': 'શું તમે ખરેખર લૉગઆઉટ કરવા માંગો છો?',
+  'account': 'ખાતું',
 };

@@ -1,13 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get_storage/get_storage.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/translations/translation_service.dart';
+import '../../routes/app_routes.dart';
 
 class ProfileView extends StatelessWidget {
   const ProfileView({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final box = GetStorage();
+    final String parlorName = box.read('parlorName') ??
+        (box.read('userRole') == 'admin' ? 'Admin User' : 'Parlor Salon');
+    final String userEmail = box.read('userEmail') ?? 'admin@myparlor.com';
+
     return Scaffold(
       appBar: AppBar(
         title: Text("profile".tr),
@@ -23,12 +30,13 @@ class ProfileView extends StatelessWidget {
               child: Icon(Icons.person, size: 50, color: Colors.white),
             ),
             const SizedBox(height: 20),
-            const Text(
-              "Admin User",
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+            Text(
+              parlorName,
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
-            const Text("admin@myparlor.com", style: TextStyle(color: Colors.grey)),
-            const SizedBox(height: 40),
+            const SizedBox(height: 4),
+            Text(userEmail, style: const TextStyle(color: Colors.grey)),
+            const SizedBox(height: 35),
             _buildSection(
               title: "language".tr,
               children: [
@@ -37,9 +45,56 @@ class ProfileView extends StatelessWidget {
                 _buildLanguageTile("gujarati".tr, "gu", Icons.g_translate),
               ],
             ),
+            const SizedBox(height: 25),
+            _buildSection(
+              title: "account".tr,
+              children: [
+                ListTile(
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: Colors.red.shade50,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(Icons.logout, color: Colors.red, size: 20),
+                  ),
+                  title: Text(
+                    "logout".tr,
+                    style: const TextStyle(
+                      color: Colors.red,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                  trailing: const Icon(Icons.chevron_right, size: 20, color: Colors.red),
+                  onTap: () => _confirmLogout(context),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
           ],
         ),
       ),
+    );
+  }
+
+  void _confirmLogout(BuildContext context) {
+    Get.defaultDialog(
+      title: "logout".tr,
+      titleStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+      middleText: "confirm_logout".tr,
+      middleTextStyle: const TextStyle(fontSize: 14),
+      textConfirm: "logout".tr,
+      textCancel: "cancel".tr,
+      confirmTextColor: Colors.white,
+      buttonColor: Colors.red.shade600,
+      cancelTextColor: Colors.grey.shade700,
+      radius: 12,
+      onConfirm: () {
+        final storage = GetStorage();
+        storage.erase();
+        Get.offAllNamed(Routes.LOGIN);
+      },
     );
   }
 
@@ -73,7 +128,7 @@ class ProfileView extends StatelessWidget {
           "language".tr,
           "${"select_language".tr}: $title",
           snackPosition: SnackPosition.BOTTOM,
-          backgroundColor: AppColors.primary.withOpacity(0.1),
+          backgroundColor: AppColors.primary.withValues(alpha: 0.1),
           colorText: AppColors.primary,
         );
       },

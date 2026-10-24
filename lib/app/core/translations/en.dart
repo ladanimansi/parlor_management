@@ -104,4 +104,7 @@ final Map<String, String> en = {
   'no_staff_available': 'No staff members available',
   'allocated_successfully': 'allocated successfully',
   'allocation_cleared_successfully': 'Staff allocation cleared successfully',
+  'logout': 'Logout',
+  'confirm_logout': 'Are you sure you want to logout?',
+  'account': 'Account',
 };
