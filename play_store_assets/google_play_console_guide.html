@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <title>Google Play Console Submission Guide - MannS Parlor</title>
+  <style>
+    @page {
+      size: A4;
+      margin: 12mm 15mm 12mm 15mm;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+    body {
+      background: #ffffff;
+      color: #2D3748;
+      font-size: 12.5px;
+      line-height: 1.5;
+    }
+    .header {
+      background: linear-gradient(135deg, #7C3AED 0%, #4F46E5 100%);
+      color: #ffffff;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 16px;
+    }
+    .header h1 {
+      font-size: 22px;
+      font-weight: 700;
+      margin-bottom: 4px;
+    }
+    .header p {
+      font-size: 13px;
+      opacity: 0.92;
+    }
+    .meta-box {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 12px;
+      background: rgba(255, 255, 255, 0.15);
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 12px;
+    }
+    .meta-item strong {
+      color: #FDE047;
+    }
+    .section {
+      background: #F8FAFC;
+      border: 1px solid #E2E8F0;
+      border-radius: 8px;
+      padding: 14px;
+      margin-bottom: 14px;
+      page-break-inside: avoid;
+    }
+    .section-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1E293B;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 10px;
+      border-bottom: 2px solid #E2E8F0;
+      padding-bottom: 6px;
+    }
+    .badge {
+      display: inline-block;
+      background: #4F46E5;
+      color: #ffffff;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 4px;
+    }
+    .badge-danger {
+      background: #DC2626;
+    }
+    .badge-success {
+      background: #16A34A;
+    }
+    .path-bar {
+      background: #EFF6FF;
+      border-left: 4px solid #3B82F6;
+      padding: 6px 10px;
+      font-size: 11.5px;
+      color: #1E40AF;
+      font-weight: 600;
+      border-radius: 0 6px 6px 0;
+      margin-bottom: 10px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 6px;
+      font-size: 11.5px;
+    }
+    th, td {
+      border: 1px solid #CBD5E1;
+      padding: 6px 8px;
+      text-align: left;
+    }
+    th {
+      background: #EDF2F7;
+      color: #334155;
+      font-weight: 600;
+    }
+    tr:nth-child(even) {
+      background: #FFFFFF;
+    }
+    .desc-box {
+      background: #FFFFFF;
+      border: 1px solid #CBD5E1;
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 11.5px;
+      line-height: 1.55;
+      color: #1E293B;
+      margin-top: 6px;
+      white-space: pre-line;
+    }
+    .highlight-box {
+      background: #FEF3C7;
+      border-left: 4px solid #F59E0B;
+      padding: 8px 10px;
+      border-radius: 0 6px 6px 0;
+      font-size: 11.5px;
+      color: #92400E;
+      margin: 8px 0;
+    }
+    .success-box {
+      background: #DCFCE7;
+      border-left: 4px solid #16A34A;
+      padding: 8px 10px;
+      border-radius: 0 6px 6px 0;
+      font-size: 11.5px;
+      color: #14532D;
+      margin: 8px 0;
+    }
+    .page-break {
+      page-break-after: always;
+    }
+    .footer {
+      text-align: center;
+      font-size: 10.5px;
+      color: #64748B;
+      margin-top: 15px;
+      padding-top: 8px;
+      border-top: 1px solid #E2E8F0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <div class="header">
+    <h1>📱 Google Play Console — Complete Submission Manual</h1>
+    <p>MannS Parlor Salon Management App ke liye verified store listing aur approval manual</p>
+    <div class="meta-box">
+      <div class="meta-item"><strong>App Name:</strong> MannS Parlor</div>
+      <div class="meta-item"><strong>Package ID:</strong> com.maans.parlormanagement</div>
+      <div class="meta-item"><strong>Version:</strong> 1.0.2 (Build 4)</div>
+      <div class="meta-item"><strong>Target SDK:</strong> Android 14+ (API 34+)</div>
+    </div>
+  </div>
+
+  <!-- SECTION 1: STORE SETTINGS -->
+  <div class="section">
+    <div class="section-title">
+      <span class="badge">STEP 1</span>
+      <span>Store Settings (Category & Contact Info)</span>
+    </div>
+    <div class="path-bar">
+      📍 Location: Left Menu ➔ Store presence ➔ Store settings
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 35%;">Field Name</th>
+          <th>What to Select / Enter</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>App or Game</strong></td>
+          <td>Select: <strong>App</strong></td>
+        </tr>
+        <tr>
+          <td><strong>Category</strong></td>
+          <td>Select: <strong>Business</strong> (ya <strong>Beauty</strong>)</td>
+        </tr>
+        <tr>
+          <td><strong>Tags</strong></td>
+          <td>Click "Manage tags" ➔ Select <strong>Business</strong>, <strong>Beauty</strong> ➔ Apply</td>
+        </tr>
+        <tr>
+          <td><strong>Email Address</strong></td>
+          <td><code>mansiflutter79@gmail.com</code> (Aapka active support email)</td>
+        </tr>
+        <tr>
+          <td><strong>Phone & Website</strong></td>
+          <td>Optional (Khali chhod sakte hain)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SECTION 2: MAIN STORE LISTING -->
+  <div class="section">
+    <div class="section-title">
+      <span class="badge">STEP 2</span>
+      <span>Main Store Listing (Titles, Assets & Descriptions)</span>
+    </div>
+    <div class="path-bar">
+      📍 Location: Left Menu ➔ Store presence ➔ Main store listing
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 28%;">Item</th>
+          <th>Value to Enter / Upload</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>App Name</strong></td>
+          <td><code>MannS Parlor</code></td>
+        </tr>
+        <tr>
+          <td><strong>Short Description</strong> (Max 80 chars)</td>
+          <td><code>Luxury Salon Management: Book appointments, track staff, inventory & billing.</code></td>
+        </tr>
+        <tr>
+          <td><strong>App Icon</strong> (512x512 PNG)</td>
+          <td>Upload file: <code>play_store_assets/app_icon_512.png</code></td>
+        </tr>
+        <tr>
+          <td><strong>Feature Graphic</strong> (1024x500 PNG)</td>
+          <td>Upload file: <code>play_store_assets/feature_graphic_1024x500.png</code></td>
+        </tr>
+        <tr>
+          <td><strong>Phone Screenshots</strong></td>
+          <td>Upload minimum 2 se 4 phone screenshots (Dashboard, Book Appointment, Orders, Staff)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SECTION 2.1: EXACT FULL DESCRIPTION BASED ON PROJECT -->
+  <div class="section">
+    <div class="section-title">
+      <span class="badge badge-success">READY TO USE</span>
+      <span>Full Description (Aapke project ke actual features par based)</span>
+    </div>
+    <p style="font-size: 11px; color: #64748B; margin-bottom: 4px;">Google Play Console ke "Full description" box mein ise seedha paste karein:</p>
+    <div class="desc-box">✨ Welcome to MannS Parlor — The Premium Salon, Spa & Beauty Parlor Management Solution!
+
+MannS Parlor is an all-in-one business management application engineered exclusively for modern beauty salons, luxury spas, bridal studios, and unisex hair salons. Streamline every aspect of your daily operations—from counter walk-ins to advance bridal appointments, staff allocation, product inventory, and customer billing.
+
+🌟 CORE FEATURES OF MANNS PARLOR:
+
+📅 1. Smart Appointment Booking & Scheduling
+• Multi-Flow Appointments: Effortlessly handle Walk-in Orders, Advance Appointments, Bridal Orders, Package Bookings, and Home Services.
+• Interactive Calendar & Slot Picker: Easy day and time slot scheduling with dedicated stylist selection.
+• Instant Status Updates: Real-time appointment stages (Pending, Confirmed, In-Preparation, Completed).
+
+✂️ 2. Comprehensive Services Menu Management
+• Organized Categories: Categorize services under Hair Care, Skin & Facial, Spa & Massage, Bridal Makeover, Nail Art, and more.
+• Customizable Pricing & Duration: Set prices, estimated durations, and service details for swift counter billing.
+
+👥 3. Staff & Stylist Allocation
+• Stylist Profiles: Manage salon staff profiles, contact information, and specializations.
+• Real-time Order Allocation: Easily assign specific appointments to available staff members to eliminate customer wait times.
+• Track Staff Productivity: Monitor assigned services and staff efficiency.
+
+📦 4. Product Catalog & Inventory Management
+• Categorized Retail & Salon Supplies: Maintain salon stock, shampoos, facial kits, creams, and cosmetic items.
+• Stock & Price Tracking: Add new items, update pricing, and monitor stock availability right from the app.
+
+⚡ 5. Order Preparation & Counter Billing
+• Order Preparation Workflow: Prepare and track service items and products needed before executing treatments.
+• Clear Order Summaries: Detailed breakdown of services, assigned staff, applied discounts, and payment methods.
+
+📊 6. Real-Time Business Dashboard
+• Live Daily Analytics: Track today's bookings, completed appointments, active staff, and revenue snapshot.
+• Quick Action Shortcuts: Create walk-in bookings and access client history with a single tap.
+
+🌍 7. Multi-Language & Luxury Design
+• 3 Language Support: Full interface available in English, Hindi (हिंदी), and Gujarati (ગુજરાતી).
+• Elegant UI/UX: Premium Rose Gold aesthetic with smooth animations and Dark Mode support.
+
+Elevate your salon business to the next level with MannS Parlor.
+Simplify Management • Delight Clients • Grow Your Business!</div>
+  </div>
+
+  <div class="page-break"></div>
+
+  <!-- SECTION 3: APP CONTENT & POLICIES -->
+  <div class="section">
+    <div class="section-title">
+      <span class="badge badge-danger">STEP 3</span>
+      <span>App Content & Policies (Policy Form Declarations)</span>
+    </div>
+    <div class="path-bar">
+      📍 Location: Left Menu ➔ Policy and programs ➔ App content
+    </div>
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 25%;">Task Name</th>
+          <th style="width: 32%;">Question / Setting</th>
+          <th>Exact Value to Select</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>1. Privacy Policy</strong></td>
+          <td>Privacy Policy URL</td>
+          <td>Apna live Privacy Policy link dalein</td>
+        </tr>
+        <tr>
+          <td><strong>2. App Access</strong><br><span class="badge badge-danger">MANDATORY</span></td>
+          <td>Credentials for Reviewers</td>
+          <td>
+            Select: <strong>"All or some functionality is restricted"</strong><br>
+            Click <strong>"+ Add instruction"</strong>:<br>
+            • Name: <code>Demo Parlor Access</code><br>
+            • Email: <em>(Test parlor account email)</em><br>
+            • Password: <em>(Test parlor account password)</em><br>
+            • Instructions: <em>"Reviewers can use these credentials to log in and test appointments, services, orders, and staff management."</em>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>3. Ads</strong></td>
+          <td>Does app contain ads?</td>
+          <td>Select: <strong>"No, my app does not contain ads"</strong></td>
+        </tr>
+        <tr>
+          <td><strong>4. Content Rating</strong></td>
+          <td>Questionnaire Category</td>
+          <td>
+            Category: <strong>"Utility, Productivity, Communication, or Other"</strong><br>
+            Sabhi questions par <strong>"No"</strong> ➔ Rating: <strong>Everyone (3+)</strong>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>5. Target Audience</strong></td>
+          <td>Target age group</td>
+          <td>
+            Select: <strong>18 and over</strong><br>
+            Could app appeal to children? ➔ <strong>"No"</strong>
+          </td>
+        </tr>
+        <tr>
+          <td><strong>6. News & COVID</strong></td>
+          <td>News / COVID-19 app?</td>
+          <td>Dono par: <strong>"No"</strong></td>
+        </tr>
+        <tr>
+          <td><strong>7. Financial Features</strong></td>
+          <td>Financial features?</td>
+          <td>Select: <strong>"My app doesn't provide any financial features"</strong></td>
+        </tr>
+        <tr>
+          <td><strong>8. Government Apps</strong></td>
+          <td>Government app?</td>
+          <td>Select: <strong>"No"</strong></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SECTION 4: DATA SAFETY -->
+  <div class="section">
+    <div class="section-title">
+      <span class="badge">STEP 4</span>
+      <span>Data Safety Form (B2B App Answers)</span>
+    </div>
+    <div class="path-bar">
+      📍 Location: Left Menu ➔ Policy and programs ➔ App content ➔ Data safety
+    </div>
+
+    <div class="highlight-box">
+      <strong>Important B2B Rule:</strong> App ke andar user signup nahi hai (Super Admin account banata hai).<br>
+      Isliye: <em>"Does your app allow users to create an account?"</em> par <strong>"NO"</strong> select karein. Isse Play Store aapse in-app account deletion nahi mangega!
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th style="width: 38%;">Question</th>
+          <th>What to Select</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Collects or shares user data?</td>
+          <td>Select: <strong>Yes</strong></td>
+        </tr>
+        <tr>
+          <td>Encrypted in transit?</td>
+          <td>Select: <strong>Yes</strong> (Firebase uses TLS/HTTPS)</td>
+        </tr>
+        <tr>
+          <td>Allows account creation in-app?</td>
+          <td>Select: <strong>No</strong></td>
+        </tr>
+        <tr>
+          <td>Request data deletion option?</td>
+          <td>Select: <strong>Yes</strong></td>
+        </tr>
+        <tr>
+          <td><strong>Name</strong> (Customer & Staff)</td>
+          <td><strong>Collected</strong> (Not shared) ➔ Purpose: <strong>App functionality</strong> & <strong>Account management</strong></td>
+        </tr>
+        <tr>
+          <td><strong>Email Address</strong></td>
+          <td><strong>Collected</strong> (Not shared) ➔ Purpose: <strong>Account management</strong></td>
+        </tr>
+        <tr>
+          <td><strong>Phone Number</strong></td>
+          <td><strong>Collected</strong> (Not shared) ➔ Purpose: <strong>App functionality</strong></td>
+        </tr>
+        <tr>
+          <td>Location, Photos/Videos, Financial</td>
+          <td>Select: <strong>No</strong> (Photos/Camera permissions have been removed)</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- SECTION 5: PRODUCTION RELEASE -->
+  <div class="section">
+    <div class="section-title">
+      <span class="badge badge-success">STEP 5</span>
+      <span>Production Release & Bundle Upload</span>
+    </div>
+    <div class="path-bar">
+      📍 Location: Left Menu ➔ Release ➔ Production
+    </div>
+    <ol style="padding-left: 18px; line-height: 1.8; font-size: 11.5px;">
+      <li><strong>Countries / Regions:</strong> "Countries / regions" tab ➔ "Add countries/regions" ➔ <strong>India</strong> (ya All) select karke <strong>Save</strong> karein.</li>
+      <li><strong>Create Release:</strong> "Releases" tab ➔ Top-right <strong>"Create new release"</strong> button.</li>
+      <li><strong>Upload AAB:</strong> File upload karein:<br>
+        <code>c:\mansi\parlor\parlor_management\build\app\outputs\bundle\release\app-release.aab</code>
+      </li>
+      <li><strong>Release Name:</strong> <code>1.0.2 (4)</code></li>
+      <li><strong>Release Notes:</strong> <code>Initial release of MannS Parlor management app with booking, staff, and billing.</code></li>
+      <li><strong>Review & Submit:</strong> Click <strong>"Next"</strong> ➔ <strong>"Save"</strong> ➔ <strong>"Review release"</strong> ➔ <strong>"Start rollout to Production"</strong>!</li>
+    </ol>
+  </div>
+
+  <div class="footer">
+    MannS Parlor App Submission Manual • Package: com.maans.parlormanagement • 2026
+  </div>
+
+</body>
+</html>

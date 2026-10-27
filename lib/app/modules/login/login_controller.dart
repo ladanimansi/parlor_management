@@ -17,7 +17,6 @@ class LoginController extends GetxController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   static const String adminEmail = 'mansiflutter79@gmail.com';
-  static const String adminPassword = 'mansi2279';
 
   @override
   void onClose() {
@@ -59,54 +58,32 @@ class LoginController extends GetxController {
     try {
       isLoading.value = true;
 
-      // Check if Admin Login
-      if (email == adminEmail) {
-        bool isValidAdmin = false;
+      // Check if Admin Login in Firestore
+      final adminQuery = await _firestore
+          .collection('admin')
+          .where('email', isEqualTo: email)
+          .where('password', isEqualTo: password)
+          .limit(1)
+          .get();
 
-        // Verify with static credential or Firestore
-        if (password == adminPassword) {
-          isValidAdmin = true;
-        } else {
-          // Check Firestore collection 'admin'
-          final query = await _firestore
-              .collection('admin')
-              .where('email', isEqualTo: email)
-              .where('password', isEqualTo: password)
-              .get();
+      if (adminQuery.docs.isNotEmpty) {
+        // Save admin session in GetStorage
+        await _storage.write('isLoggedIn', true);
+        await _storage.write('userEmail', email);
+        await _storage.write('userRole', 'admin');
+        await _storage.write('allowedFlowTypes', FlowTypeConstants.allFlowTypeNames);
 
-          if (query.docs.isNotEmpty) {
-            isValidAdmin = true;
-          }
-        }
+        Get.snackbar(
+          'Welcome',
+          'Hello Admin, login successful!',
+          snackPosition: SnackPosition.BOTTOM,
+          backgroundColor: AppColors.success.withValues(alpha: 0.15),
+          colorText: AppColors.success,
+        );
 
-        if (isValidAdmin) {
-          // Save admin session in GetStorage
-          await _storage.write('isLoggedIn', true);
-          await _storage.write('userEmail', email);
-          await _storage.write('userRole', 'admin');
-          await _storage.write('allowedFlowTypes', FlowTypeConstants.allFlowTypeNames);
-
-          Get.snackbar(
-            'Welcome',
-            'Hello Admin, login successful!',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: AppColors.success.withValues(alpha: 0.15),
-            colorText: AppColors.success,
-          );
-
-          // Navigate to Admin View
-          Get.offAllNamed(Routes.ADMIN);
-          return;
-        } else {
-          Get.snackbar(
-            'Login Failed',
-            'Invalid admin password. Please try again.',
-            snackPosition: SnackPosition.BOTTOM,
-            backgroundColor: AppColors.error.withValues(alpha: 0.1),
-            colorText: AppColors.error,
-          );
-          return;
-        }
+        // Navigate to Admin View
+        Get.offAllNamed(Routes.ADMIN);
+        return;
       }
 
       // Check registered Parlors / Clients in Firestore

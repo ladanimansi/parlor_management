@@ -12,9 +12,8 @@ import '../../routes/app_routes.dart';
 class AdminController extends GetxController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  // Static Admin Credentials requested
+  // Admin Email
   static const String staticEmail = 'mansiflutter79@gmail.com';
-  static const String staticPassword = 'mansi2279';
 
   final Rx<AdminModel?> currentAdmin = Rx<AdminModel?>(null);
   final RxBool isLoading = false.obs;
@@ -116,7 +115,7 @@ class AdminController extends GetxController {
     selectedFlowRights.assignAll(FlowTypeConstants.allFlowTypeNames);
   }
 
-  /// Initialize and ensure static admin exists in Firestore 'admin' table/collection
+  /// Initialize and load admin from Firestore 'admin' table/collection
   Future<void> initStaticAdmin() async {
     try {
       isLoading.value = true;
@@ -125,36 +124,17 @@ class AdminController extends GetxController {
       final adminDocRef = _firestore.collection('admin').doc('static_admin');
       final snapshot = await adminDocRef.get();
 
-      if (!snapshot.exists) {
-        final initialAdmin = AdminModel(
-          id: 'static_admin',
-          email: staticEmail,
-          password: staticPassword,
-          role: 'admin',
-          createdAt: DateTime.now(),
-        );
-
-        await adminDocRef.set(initialAdmin.toMap());
-        currentAdmin.value = initialAdmin;
-        syncStatus.value = 'Admin synced with Firebase';
-        if (kDebugMode) {
-          print('Admin table initialized with static admin in Firestore');
-        }
-      } else {
+      if (snapshot.exists) {
         final data = snapshot.data();
         if (data != null) {
           currentAdmin.value = AdminModel.fromMap(data, docId: snapshot.id);
           syncStatus.value = 'Admin connected from Firebase';
         }
+      } else {
+        syncStatus.value = 'Admin connected';
       }
     } catch (e) {
-      syncStatus.value = 'Offline mode: Using local static admin';
-      currentAdmin.value = AdminModel(
-        id: 'static_admin',
-        email: staticEmail,
-        password: staticPassword,
-        role: 'admin',
-      );
+      syncStatus.value = 'Offline mode';
       if (kDebugMode) {
         print('Firestore admin error / offline fallback: $e');
       }
