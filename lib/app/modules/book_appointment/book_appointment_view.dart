@@ -257,63 +257,20 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
                           ),
                         ),
                         const SizedBox(height: 10),
-                        // Age & Gender Fields
+                        // Age Field
                         Obx(() {
-                          return Row(
-                            children: [
-                              Expanded(
-                                child: TextFormField(
-                                  decoration: const InputDecoration(
-                                    labelText: "Age",
-                                    prefixIcon: Icon(Icons.cake_outlined),
-                                  ),
-                                  keyboardType: TextInputType.number,
-                                  initialValue:
-                                      controller.clientAge.value?.toString() ??
-                                      '',
-                                  onChanged: (val) {
-                                    controller.clientAge.value = int.tryParse(
-                                      val,
-                                    );
-                                  },
-                                  key: ValueKey(
-                                    'age_${controller.clientAge.value}',
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: 15),
-                              Expanded(
-                                child: DropdownButtonFormField<String>(
-                                  value: controller.clientGender.value.isEmpty
-                                      ? null
-                                      : controller.clientGender.value,
-                                  hint: const Text("Gender"),
-                                  decoration: const InputDecoration(
-                                    prefixIcon: Icon(Icons.people_outline),
-                                    contentPadding: EdgeInsets.symmetric(
-                                      horizontal: 10,
-                                    ),
-                                  ),
-                                  items: const [
-                                    DropdownMenuItem(
-                                      value: 'Female',
-                                      child: Text("Female"),
-                                    ),
-                                    DropdownMenuItem(
-                                      value: 'Male',
-                                      child: Text("Male"),
-                                    ),
-                                    DropdownMenuItem(
-                                      value: 'Other',
-                                      child: Text("Other"),
-                                    ),
-                                  ],
-                                  onChanged: (val) {
-                                    controller.clientGender.value = val ?? '';
-                                  },
-                                ),
-                              ),
-                            ],
+                          return TextFormField(
+                            decoration: const InputDecoration(
+                              labelText: "Age",
+                              prefixIcon: Icon(Icons.cake_outlined),
+                            ),
+                            keyboardType: TextInputType.number,
+                            initialValue:
+                                controller.clientAge.value?.toString() ?? '',
+                            onChanged: (val) {
+                              controller.clientAge.value = int.tryParse(val);
+                            },
+                            key: ValueKey('age_${controller.clientAge.value}'),
                           );
                         }),
                       ],

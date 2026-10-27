@@ -107,6 +107,65 @@ class AddParlorView extends GetView<AdminController> {
                     icon: Icons.location_city_outlined,
                   ),
                   const SizedBox(height: 14),
+                  // Gender / Salon Type
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Gender / Salon Type',
+                        style: TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                          color: AppColors.textPrimaryLight,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Obx(
+                        () => DropdownButtonFormField<String>(
+                          value: controller.selectedGender.value,
+                          decoration: InputDecoration(
+                            hintText: 'Select Gender',
+                            prefixIcon: const Icon(Icons.wc_outlined, color: AppColors.primary, size: 20),
+                            filled: true,
+                            fillColor: const Color(0xFFF9FAFB),
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                            border: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+                            ),
+                            enabledBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+                            ),
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(10),
+                              borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                            ),
+                          ),
+                          items: const [
+                            DropdownMenuItem(
+                              value: 'Female',
+                              child: Text('Female (Women / Ladies)'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'Male',
+                              child: Text('Male (Men / Gents)'),
+                            ),
+                            DropdownMenuItem(
+                              value: 'Unisex',
+                              child: Text('Unisex (All)'),
+                            ),
+                          ],
+                          onChanged: (val) {
+                            if (val != null) {
+                              controller.selectedGender.value = val;
+                            }
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 14),
                   _buildTextField(
                     controller: controller.addressController,
                     label: 'Full Address',

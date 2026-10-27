@@ -51,6 +51,7 @@ class AdminController extends GetxController {
   final addressController = TextEditingController();
   final cityController = TextEditingController();
   final RxBool isPasswordVisible = false.obs;
+  final RxString selectedGender = 'Female'.obs;
 
   // Flow Type Rights state for Adding a parlor (Defaults to all enabled)
   final RxList<String> selectedFlowRights = <String>[
@@ -112,6 +113,7 @@ class AdminController extends GetxController {
     phoneController.clear();
     addressController.clear();
     cityController.clear();
+    selectedGender.value = 'Female';
     selectedFlowRights.assignAll(FlowTypeConstants.allFlowTypeNames);
   }
 
@@ -234,6 +236,7 @@ class AdminController extends GetxController {
         phone: phone,
         address: address,
         city: city,
+        gender: selectedGender.value,
         role: 'client',
         isActive: true,
         allowedFlowTypes: List<String>.from(selectedFlowRights),

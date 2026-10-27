@@ -412,6 +412,11 @@ class AdminView extends GetView<AdminController> {
                       icon: Icons.location_on_outlined,
                       label: parlor.city,
                     ),
+                  if (parlor.gender.isNotEmpty)
+                    _buildPill(
+                      icon: Icons.wc_outlined,
+                      label: parlor.gender,
+                    ),
                 ],
               ),
 

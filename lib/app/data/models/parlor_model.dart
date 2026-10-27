@@ -7,6 +7,7 @@ class ParlorModel {
   final String phone;
   final String address;
   final String city;
+  final String gender;
   final String role;
   final bool isActive;
   final List<String> allowedFlowTypes;
@@ -21,6 +22,7 @@ class ParlorModel {
     required this.phone,
     required this.address,
     this.city = '',
+    this.gender = 'Female',
     this.role = 'client',
     this.isActive = true,
     this.allowedFlowTypes = const [
@@ -43,6 +45,7 @@ class ParlorModel {
       'phone': phone,
       'address': address,
       'city': city,
+      'gender': gender,
       'role': role,
       'isActive': isActive,
       'allowedFlowTypes': allowedFlowTypes,
@@ -60,6 +63,7 @@ class ParlorModel {
       phone: map['phone'] ?? '',
       address: map['address'] ?? '',
       city: map['city'] ?? '',
+      gender: map['gender'] ?? 'Female',
       role: map['role'] ?? 'client',
       isActive: map['isActive'] ?? true,
       allowedFlowTypes: map['allowedFlowTypes'] != null
@@ -86,6 +90,7 @@ class ParlorModel {
     String? phone,
     String? address,
     String? city,
+    String? gender,
     String? role,
     bool? isActive,
     List<String>? allowedFlowTypes,
@@ -100,6 +105,7 @@ class ParlorModel {
       phone: phone ?? this.phone,
       address: address ?? this.address,
       city: city ?? this.city,
+      gender: gender ?? this.gender,
       role: role ?? this.role,
       isActive: isActive ?? this.isActive,
       allowedFlowTypes: allowedFlowTypes ?? this.allowedFlowTypes,
