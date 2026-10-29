@@ -208,7 +208,11 @@ class AddParlorView extends GetView<AdminController> {
                   Obx(() {
                     return Column(
                       children: FlowTypeConstants.allFlowTypes.map((flowItem) {
+                        final gender = controller.selectedGender.value;
                         final isChecked = controller.selectedFlowRights.contains(flowItem.name);
+                        final flowLabel = flowItem.getLabelKey(gender).tr;
+                        final flowIcon = flowItem.getIcon(gender);
+                        final flowDesc = flowItem.getDescription(gender);
                         return Container(
                           margin: const EdgeInsets.only(bottom: 8),
                           decoration: BoxDecoration(
@@ -238,13 +242,13 @@ class AddParlorView extends GetView<AdminController> {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Icon(
-                                flowItem.icon,
+                                flowIcon,
                                 size: 18,
                                 color: isChecked ? AppColors.primary : Colors.grey.shade600,
                               ),
                             ),
                             title: Text(
-                              flowItem.labelKey.tr,
+                              flowLabel,
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
@@ -252,7 +256,7 @@ class AddParlorView extends GetView<AdminController> {
                               ),
                             ),
                             subtitle: Text(
-                              flowItem.description,
+                              flowDesc,
                               style: TextStyle(
                                 fontSize: 11,
                                 color: Colors.grey.shade600,

@@ -3,6 +3,7 @@ import 'package:get/get.dart';
 import 'package:get_storage/get_storage.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/translations/translation_service.dart';
+import '../../core/utils/parlor_session.dart';
 import '../../routes/app_routes.dart';
 
 class ProfileView extends StatelessWidget {
@@ -36,7 +37,24 @@ class ProfileView extends StatelessWidget {
             ),
             const SizedBox(height: 4),
             Text(userEmail, style: const TextStyle(color: Colors.grey)),
-            const SizedBox(height: 35),
+            const SizedBox(height: 8),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(color: AppColors.primary.withValues(alpha: 0.3)),
+              ),
+              child: Text(
+                box.read('userRole') == 'admin' ? '🛡️ Super Admin' : ParlorSession.parlorTypeBadgeText,
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.primary,
+                ),
+              ),
+            ),
+            const SizedBox(height: 25),
             _buildSection(
               title: "language".tr,
               children: [

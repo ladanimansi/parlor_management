@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/utils/parlor_session.dart';
 import '../../routes/app_routes.dart';
 
 class MenuView extends GetView<MenuController> {
@@ -23,7 +24,7 @@ class MenuView extends GetView<MenuController> {
               ListTile(
                 leading: const Icon(Icons.spa_outlined, color: Colors.grey),
                 title: const Text("Services List"),
-                subtitle: const Text("Hair Cut, Facial, Eyebrow, etc."),
+                subtitle: Text(ParlorSession.serviceSubtitle),
                 onTap: () {
                   Get.toNamed(Routes.PRODUCT_CATEGORY);
                 },

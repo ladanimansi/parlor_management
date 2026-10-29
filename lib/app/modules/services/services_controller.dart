@@ -1,4 +1,5 @@
 import 'package:get/get.dart';
+import '../../core/utils/parlor_session.dart';
 import '../../data/models/service_model.dart';
 
 class ServicesController extends GetxController {
@@ -6,7 +7,15 @@ class ServicesController extends GetxController {
   final isLoading = false.obs;
   final selectedCategory = 'All'.obs;
 
-  final List<String> categories = ['All', 'Bridal', 'Hair', 'Skin Care', 'Nail Care'];
+  List<String> get categories {
+    if (ParlorSession.isMale) {
+      return ['All', 'Groom', 'Hair', 'Beard & Shave', 'Skin Care'];
+    } else if (ParlorSession.isUnisex) {
+      return ['All', 'Women', 'Men', 'Bridal & Groom', 'Hair', 'Skin Care'];
+    } else {
+      return ['All', 'Bridal', 'Hair', 'Skin Care', 'Nail Care'];
+    }
+  }
 
   void setCategory(String category) {
     selectedCategory.value = category;

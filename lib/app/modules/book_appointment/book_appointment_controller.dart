@@ -12,6 +12,7 @@ import '../../data/services/customer_service.dart';
 import '../product_category/product_category_controller.dart';
 import '../product_item/product_item_controller.dart';
 import '../services/services_controller.dart';
+import '../../core/utils/parlor_session.dart';
 import '../../routes/app_routes.dart';
 
 class BookAppointmentController extends GetxController {
@@ -318,6 +319,14 @@ class BookAppointmentController extends GetxController {
       visitingDate.value = initialDate;
     }
     selectedCategories.assignAll(['General']);
+
+    // Set default customer gender based on Parlor gender
+    if (ParlorSession.isMale) {
+      clientGender.value = 'Male';
+    } else {
+      clientGender.value = 'Female';
+    }
+
     if (isFlowTypeAllowed(FlowTypeConstants.walkInOrders)) {
       selectedBookingType.value = FlowTypeConstants.walkInOrders;
       selectedStatus.value = 'Waiting';

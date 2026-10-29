@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/custom_widgets/custom_card.dart';
+import '../../core/utils/parlor_session.dart';
 import '../../data/models/appointment_model.dart';
 import 'book_appointment_controller.dart';
 import 'package:intl/intl.dart';
@@ -49,8 +50,8 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
                       },
                       {
                         'name': 'Bridal Orders',
-                        'key': 'bridal_orders',
-                        'icon': Icons.auto_awesome,
+                        'key': ParlorSession.bridalFlowKey,
+                        'icon': ParlorSession.isMale ? Icons.face : Icons.auto_awesome,
                       },
                       {
                         'name': 'Package',
@@ -257,6 +258,72 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
                           ),
                         ),
                         const SizedBox(height: 10),
+                        // Customer Gender (Only displayed for Unisex Salon)
+                        if (ParlorSession.isUnisex) ...[
+                          Obx(() {
+                            final currentGender = controller.clientGender.value;
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    const Icon(Icons.wc, size: 14, color: AppColors.primary),
+                                    const SizedBox(width: 4),
+                                    Text(
+                                      "customer_gender".tr,
+                                      style: const TextStyle(
+                                        fontSize: 12,
+                                        fontWeight: FontWeight.w600,
+                                        color: AppColors.textPrimaryLight,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 6),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: ChoiceChip(
+                                        avatar: const Icon(Icons.female, size: 16, color: Colors.pink),
+                                        label: const Center(child: Text("Female")),
+                                        selected: currentGender == 'Female',
+                                        selectedColor: Colors.pink.shade50,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(10),
+                                          side: BorderSide(
+                                            color: currentGender == 'Female' ? Colors.pink : Colors.grey.shade300,
+                                          ),
+                                        ),
+                                        onSelected: (selected) {
+                                          if (selected) controller.clientGender.value = 'Female';
+                                        },
+                                      ),
+                                    ),
+                                    const SizedBox(width: 10),
+                                    Expanded(
+                                      child: ChoiceChip(
+                                        avatar: const Icon(Icons.male, size: 16, color: Colors.blue),
+                                        label: const Center(child: Text("Male")),
+                                        selected: currentGender == 'Male',
+                                        selectedColor: Colors.blue.shade50,
+                                        shape: RoundedRectangleBorder(
+                                          borderRadius: BorderRadius.circular(10),
+                                          side: BorderSide(
+                                            color: currentGender == 'Male' ? Colors.blue : Colors.grey.shade300,
+                                          ),
+                                        ),
+                                        onSelected: (selected) {
+                                          if (selected) controller.clientGender.value = 'Male';
+                                        },
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 10),
+                              ],
+                            );
+                          }),
+                        ],
                         // Age Field
                         Obx(() {
                           return TextFormField(

@@ -481,6 +481,8 @@ class AdminView extends GetView<AdminController> {
                 runSpacing: 4,
                 children: FlowTypeConstants.allFlowTypes.map((flowItem) {
                   final hasRight = FlowTypeConstants.isAllowed(parlor.allowedFlowTypes, flowItem.name);
+                  final flowLabel = flowItem.getLabelKey(parlor.gender).tr;
+                  final flowIcon = flowItem.getIcon(parlor.gender);
                   return Container(
                     padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
                     decoration: BoxDecoration(
@@ -499,13 +501,13 @@ class AdminView extends GetView<AdminController> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                          flowItem.icon,
+                          flowIcon,
                           size: 11,
                           color: hasRight ? AppColors.primary : Colors.grey.shade400,
                         ),
                         const SizedBox(width: 4),
                         Text(
-                          flowItem.labelKey.tr,
+                          flowLabel,
                           style: TextStyle(
                             fontSize: 10,
                             fontWeight: hasRight ? FontWeight.w600 : FontWeight.normal,
@@ -749,6 +751,9 @@ class AdminView extends GetView<AdminController> {
                     return Column(
                       children: FlowTypeConstants.allFlowTypes.map((flowItem) {
                         final isEnabled = FlowTypeConstants.isAllowed(tempRights, flowItem.name);
+                        final flowLabel = flowItem.getLabelKey(parlor.gender).tr;
+                        final flowIcon = flowItem.getIcon(parlor.gender);
+                        final flowDesc = flowItem.getDescription(parlor.gender);
 
                         return Container(
                           margin: const EdgeInsets.only(bottom: 6),
@@ -798,13 +803,13 @@ class AdminView extends GetView<AdminController> {
                                 borderRadius: BorderRadius.circular(8),
                               ),
                               child: Icon(
-                                flowItem.icon,
+                                flowIcon,
                                 size: 18,
                                 color: isEnabled ? AppColors.primary : Colors.grey.shade500,
                               ),
                             ),
                             title: Text(
-                              flowItem.labelKey.tr,
+                              flowLabel,
                               style: TextStyle(
                                 fontSize: 13,
                                 fontWeight: FontWeight.w600,
@@ -812,7 +817,7 @@ class AdminView extends GetView<AdminController> {
                               ),
                             ),
                             subtitle: Text(
-                              flowItem.description,
+                              flowDesc,
                               style: TextStyle(
                                 fontSize: 11,
                                 color: Colors.grey.shade500,

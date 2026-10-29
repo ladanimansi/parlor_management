@@ -14,6 +14,36 @@ class FlowTypeItem {
     required this.icon,
     required this.description,
   });
+
+  String getLabelKey(String? gender) {
+    if (id == 'bridal_orders') {
+      final g = (gender ?? '').toLowerCase();
+      if (g == 'male') return 'groom_orders';
+      if (g == 'unisex') return 'bridal_and_groom_orders';
+      return 'bridal_orders';
+    }
+    return labelKey;
+  }
+
+  IconData getIcon(String? gender) {
+    if (id == 'bridal_orders') {
+      final g = (gender ?? '').toLowerCase();
+      if (g == 'male') return Icons.face;
+      if (g == 'unisex') return Icons.people;
+      return Icons.auto_awesome;
+    }
+    return icon;
+  }
+
+  String getDescription(String? gender) {
+    if (id == 'bridal_orders') {
+      final g = (gender ?? '').toLowerCase();
+      if (g == 'male') return 'Special groom packages and styling bookings';
+      if (g == 'unisex') return 'Special bridal & groom packages and pre-bookings';
+      return 'Special bridal packages and pre-bookings';
+    }
+    return description;
+  }
 }
 
 class FlowTypeConstants {
@@ -77,6 +107,10 @@ class FlowTypeConstants {
       final itemLower = item.trim().toLowerCase();
       if (itemLower == lower) return true;
       if (itemLower.contains('advance') && lower.contains('advance')) return true;
+      if ((itemLower.contains('bridal') || itemLower.contains('groom')) &&
+          (lower.contains('bridal') || lower.contains('groom'))) {
+        return true;
+      }
       return false;
     });
   }

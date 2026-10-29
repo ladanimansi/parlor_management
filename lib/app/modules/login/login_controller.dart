@@ -114,12 +114,15 @@ class LoginController extends GetxController {
             ? List<String>.from(parlorData['allowedFlowTypes'])
             : FlowTypeConstants.allFlowTypeNames;
 
+        final String parlorGender = parlorData['gender'] ?? 'Female';
+
         // Save Parlor Session
         await _storage.write('isLoggedIn', true);
         await _storage.write('userEmail', email);
         await _storage.write('userRole', 'parlor');
         await _storage.write('parlorId', parlorQuery.docs.first.id);
         await _storage.write('parlorName', parlorName);
+        await _storage.write('parlorGender', parlorGender);
         await _storage.write('allowedFlowTypes', allowedFlowTypes);
 
         Get.snackbar(

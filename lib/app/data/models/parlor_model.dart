@@ -35,6 +35,10 @@ class ParlorModel {
     this.createdAt,
   });
 
+  bool get isFemale => gender.toLowerCase() == 'female';
+  bool get isMale => gender.toLowerCase() == 'male';
+  bool get isUnisex => gender.toLowerCase() == 'unisex';
+
   Map<String, dynamic> toMap() {
     return {
       'id': id,

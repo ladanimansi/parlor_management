@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../core/theme/app_colors.dart';
+import '../../core/utils/parlor_session.dart';
 import 'product_category_controller.dart';
 
 class AddProductCategoryView extends GetView<ProductCategoryController> {
@@ -25,7 +26,7 @@ class AddProductCategoryView extends GetView<ProductCategoryController> {
             TextField(
               controller: textController,
               decoration: InputDecoration(
-                hintText: "E.g., Hair Cut, Facial, Eyebrow...",
+                hintText: ParlorSession.serviceNameHint,
                 labelText: "Service Name",
                 prefixIcon: const Icon(Icons.spa_outlined, color: AppColors.primary),
                 filled: true,
