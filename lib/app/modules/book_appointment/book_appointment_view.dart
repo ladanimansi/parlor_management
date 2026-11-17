@@ -284,7 +284,7 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
                         decoration: BoxDecoration(
                           gradient: isSelected
                               ? const LinearGradient(
-                                  colors: [Color(0xFFC77E88), AppColors.primary],
+                                  colors: [AppColors.primaryLight, AppColors.primary],
                                   begin: Alignment.topLeft,
                                   end: Alignment.bottomRight,
                                 )
@@ -1103,7 +1103,7 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
                         width: 42,
                         decoration: BoxDecoration(
                           gradient: const LinearGradient(
-                            colors: [Color(0xFFC77E88), AppColors.primary],
+                            colors: [AppColors.primaryLight, AppColors.primary],
                             begin: Alignment.topLeft,
                             end: Alignment.bottomRight,
                           ),
@@ -1286,7 +1286,7 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
                   gradient: isSaving
                       ? null
                       : const LinearGradient(
-                          colors: [Color(0xFFC77E88), AppColors.primary],
+                          colors: [AppColors.primaryLight, AppColors.primary],
                           begin: Alignment.centerLeft,
                           end: Alignment.centerRight,
                         ),
@@ -1353,7 +1353,7 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
                   gradient: isSaving
                       ? null
                       : const LinearGradient(
-                          colors: [Color(0xFF3B4F63), AppColors.secondary],
+                          colors: [AppColors.secondaryLight, AppColors.secondary],
                           begin: Alignment.centerLeft,
                           end: Alignment.centerRight,
                         ),
@@ -1751,7 +1751,7 @@ class BookAppointmentView extends GetView<BookAppointmentController> {
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     decoration: BoxDecoration(
                       gradient: const LinearGradient(
-                        colors: [Color(0xFFC77E88), AppColors.primary],
+                        colors: [AppColors.primaryLight, AppColors.primary],
                       ),
                       borderRadius: BorderRadius.circular(12),
                     ),

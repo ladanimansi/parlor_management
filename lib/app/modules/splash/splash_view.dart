@@ -20,11 +20,7 @@ class SplashView extends GetView<SplashController> {
         height: double.infinity,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
-            colors: [
-              Color(0xFFFFFBF8),
-              Color(0xFFF9EFE6),
-              Color(0xFFF2E2D6),
-            ],
+            colors: [Color(0xFFFFFFFF), Color(0xFFFBF7F8), Color(0xFFF3E8EC)],
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
           ),
@@ -102,7 +98,9 @@ class SplashView extends GetView<SplashController> {
                             fontSize: 16,
                             fontWeight: FontWeight.w700,
                             letterSpacing: 4.5,
-                            color: AppColors.textPrimaryLight.withValues(alpha: 0.85),
+                            color: AppColors.textPrimaryLight.withValues(
+                              alpha: 0.85,
+                            ),
                           ),
                         ),
                         const SizedBox(height: 12),
