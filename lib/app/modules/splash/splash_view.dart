@@ -9,8 +9,10 @@ class SplashView extends GetView<SplashController> {
 
   @override
   Widget build(BuildContext context) {
-    // Ensures controller is initialized
-    controller;
+    // Ensure controller is registered safely
+    if (!Get.isRegistered<SplashController>()) {
+      Get.put(SplashController());
+    }
 
     return Scaffold(
       body: Container(
@@ -34,53 +36,52 @@ class SplashView extends GetView<SplashController> {
 
               // Logo with smooth entrance animation
               TweenAnimationBuilder<double>(
-                tween: Tween<double>(begin: 0.8, end: 1.0),
+                tween: Tween<double>(begin: 0.0, end: 1.0),
                 duration: const Duration(milliseconds: 1200),
                 curve: Curves.easeOutBack,
-                builder: (context, scale, child) {
+                builder: (context, value, _) {
                   return Transform.scale(
-                    scale: scale,
-                    child: child,
-                  );
-                },
-                child: TweenAnimationBuilder<double>(
-                  tween: Tween<double>(begin: 0.0, end: 1.0),
-                  duration: const Duration(milliseconds: 1000),
-                  curve: Curves.easeIn,
-                  builder: (context, opacity, child) {
-                    return Opacity(
-                      opacity: opacity,
-                      child: child,
-                    );
-                  },
-                  child: Container(
-                    width: 220,
-                    height: 220,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.18),
-                          blurRadius: 36,
-                          spreadRadius: 8,
-                          offset: const Offset(0, 14),
+                    scale: 0.8 + (0.2 * value),
+                    child: Opacity(
+                      opacity: value.clamp(0.0, 1.0),
+                      child: Container(
+                        width: 220,
+                        height: 220,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppColors.primary.withValues(alpha: 0.18),
+                              blurRadius: 36,
+                              spreadRadius: 8,
+                              offset: const Offset(0, 14),
+                            ),
+                            BoxShadow(
+                              color: AppColors.accent.withValues(alpha: 0.12),
+                              blurRadius: 24,
+                              spreadRadius: 2,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
                         ),
-                        BoxShadow(
-                          color: AppColors.accent.withValues(alpha: 0.12),
-                          blurRadius: 24,
-                          spreadRadius: 2,
-                          offset: const Offset(0, 4),
+                        child: Center(
+                          child: ClipOval(
+                            child: Padding(
+                              padding: const EdgeInsets.all(12.0),
+                              child: Image.asset(
+                                'assets/images/logo.png',
+                                width: 196,
+                                height: 196,
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+                          ),
                         ),
-                      ],
-                    ),
-                    child: ClipOval(
-                      child: Image.asset(
-                        'assets/images/logo.png',
-                        fit: BoxFit.cover,
                       ),
                     ),
-                  ),
-                ),
+                  );
+                },
               ),
 
               const SizedBox(height: 36),
@@ -88,42 +89,41 @@ class SplashView extends GetView<SplashController> {
               // Tagline & decorative ornament
               TweenAnimationBuilder<double>(
                 tween: Tween<double>(begin: 0.0, end: 1.0),
-                duration: const Duration(milliseconds: 1400),
+                duration: const Duration(milliseconds: 1200),
                 curve: Curves.easeOut,
-                builder: (context, opacity, child) {
+                builder: (context, value, _) {
                   return Opacity(
-                    opacity: opacity,
-                    child: child,
+                    opacity: value,
+                    child: Column(
+                      children: [
+                        Text(
+                          "MANAGE  •  BOOK  •  GROW",
+                          style: GoogleFonts.cormorantGaramond(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            letterSpacing: 4.5,
+                            color: AppColors.textPrimaryLight.withValues(alpha: 0.85),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        Container(
+                          width: 48,
+                          height: 2,
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [
+                                Colors.transparent,
+                                AppColors.accent,
+                                Colors.transparent,
+                              ],
+                            ),
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                      ],
+                    ),
                   );
                 },
-                child: Column(
-                  children: [
-                    Text(
-                      "MANAGE  •  BOOK  •  GROW",
-                      style: GoogleFonts.cormorantGaramond(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 4.5,
-                        color: AppColors.textPrimaryLight.withValues(alpha: 0.85),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Container(
-                      width: 48,
-                      height: 2,
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [
-                            Colors.transparent,
-                            AppColors.accent,
-                            Colors.transparent,
-                          ],
-                        ),
-                        borderRadius: BorderRadius.circular(2),
-                      ),
-                    ),
-                  ],
-                ),
               ),
 
               const Spacer(flex: 3),

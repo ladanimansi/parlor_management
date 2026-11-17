@@ -26,30 +26,27 @@ class LoginView extends GetView<LoginController> {
                   // App Brand Logo / Icon
                   Center(
                     child: Container(
-                      width: 90,
-                      height: 90,
+                      width: 96,
+                      height: 96,
                       decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [
-                            AppColors.primary,
-                            AppColors.primary.withValues(alpha: 0.75),
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
+                        color: Colors.white,
                         shape: BoxShape.circle,
                         boxShadow: [
                           BoxShadow(
-                            color: AppColors.primary.withValues(alpha: 0.3),
+                            color: AppColors.primary.withValues(alpha: 0.22),
                             blurRadius: 18,
                             offset: const Offset(0, 8),
                           ),
                         ],
                       ),
-                      child: const Icon(
-                        Icons.spa_rounded,
-                        size: 46,
-                        color: Colors.white,
+                      child: ClipOval(
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Image.asset(
+                            'assets/images/logo.png',
+                            fit: BoxFit.contain,
+                          ),
+                        ),
                       ),
                     ),
                   ),
